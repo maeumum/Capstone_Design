@@ -199,7 +199,12 @@ html, body {
 }
 
 .btn.small-text  { font-size: 21px; }
-.btn.smaller-text { font-size: 19px; }
+.btn.smaller-text {
+  font-size: 17px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
 .btn.two-line     { line-height: 1.1; }
 
 /* Variants */
@@ -361,30 +366,649 @@ html, body {
 }
 
 /* ========================================================================
-   PHONE FRAME  (ATM Screen Mobile.html 전용)
-   390×844(9:19.5) 폰 안에 landscape ATM(1280×800)을 너비에 맞게 축소,
-   위아래 검은 레터박스로 수직 중앙 정렬.
+   Phone-ratio wrapper — landscape ATM (1280×800) letterboxed into 9:19.5
+   The ATM screen content is UNCHANGED; only top/bottom black bars are added.
    ======================================================================== */
 
-/* 폰 화면 전체를 검정으로 채우고 ATM을 수직 중앙에 둠 */
 .phone-frame {
-  width: 100vw;
-  height: 100svh;
-  background: #000;
+  width: 390px;
+  height: 844px;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--bg-top) 0%,
+      var(--bg-mid) 30%,
+      var(--bg-bot) 60%,
+      var(--bg-bot) 100%
+    );
+  position: relative;
   overflow: hidden;
+}
+
+.phone-frame .atm-screen {
+  background: transparent;
+  box-shadow: none;
+}
+.phone-frame .atm-screen::before { display: none; }
+
+.phone-frame .atm-screen {
+  position: absolute;
+  top: 300px;
+  left: 0;
+  transform: scale(0.30469);
+  transform-origin: top left;
+}
+
+@media (max-height: 880px) {
+  .phone-frame {
+    transform: scale(calc((100vh - 40px) / 844));
+    transform-origin: top center;
+  }
+}
+
+/* ========================================================================
+   Warning / dialog screen variant
+   ======================================================================== */
+
+.atm-body.dialog {
+  display: block;
+  padding: 18px 44px 36px;
+}
+
+.warning-panel {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 130px);
+  border: 1px solid rgba(80, 110, 150, .45);
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      to bottom,
+      #e7eef8 0%,
+      #f4f7fb 12%,
+      #ffffff 40%,
+      #ffffff 100%
+    );
+  padding: 22px 40px 28px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 0 0 1px rgba(255,255,255,.6) inset;
+  overflow: hidden;
+}
+
+.warning-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(140, 170, 210, 0) 0px,
+      rgba(140, 170, 210, 0) 8px,
+      rgba(140, 170, 210, .10) 8px,
+      rgba(140, 170, 210, .10) 9px
+    );
+  pointer-events: none;
+}
+
+.warning-title {
+  margin: 4px 0 18px;
+  text-align: center;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #1c1c1c;
+}
+.warning-title .accent {
+  color: #d11a1a;
+}
+
+.warning-body {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #1c1c1c;
+  letter-spacing: -0.01em;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+.warning-body .accent { color: #d11a1a; }
+
+.slot-illus {
+  margin: 26px auto 0;
+  width: 360px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 레터박스 높이 = (화면높이 - ATM 시각 높이) / 2
-     ATM 시각 높이 = 800px × (100vw / 1280) = 62.5vw              */
-  padding-top: max(0px, calc((100svh - 62.5vw) / 2));
-  font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  gap: 14px;
 }
 
-/* 기존 media query의 scale(100vw/1340) 을 scale(100vw/1280) 으로 덮어씀
-   → ATM 너비가 폰 너비와 정확히 일치                              */
-.phone-frame .atm-screen {
-  transform: scale(calc(100vw / 1280)) !important;
-  transform-origin: top center !important;
-  box-shadow: none;
+.slot-shape {
+  width: 100%;
+  height: 110px;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 30% 30%, #2a3a78 0%, #0b1340 55%, #050820 100%);
+  position: relative;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,.25),
+    0 1px 0 rgba(255,255,255,.4);
+  overflow: hidden;
+}
+.slot-shape::before {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 30%;
+  bottom: 30%;
+  border-radius: 6px;
+  background: #000;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.6) inset,
+    0 -1px 0 rgba(255,255,255,.15) inset;
+}
+.slot-shape::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  right: 10px;
+  height: 32%;
+  border-radius: 10px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,.35) 0%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
+}
+
+.slot-label {
+  width: 100%;
+  border: 1.5px solid #9aa8b8;
+  border-radius: 4px;
+  background: #fff;
+  padding: 6px 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+.slot-label .col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+.slot-label .col + .col {
+  border-left: 1px solid #c2cad6;
+}
+.slot-label .ko { font-size: 20px; font-weight: 800; }
+.slot-label .en { font-size: 13px; font-weight: 600; color: #6a7689; letter-spacing: .02em; }
+.slot-label .icon {
+  width: 38px;
+  height: 30px;
+  border: 2px solid #2a3a55;
+  border-radius: 3px;
+  position: relative;
+  margin-left: 4px;
+}
+.slot-label .icon::before {
+  content: "";
+  position: absolute;
+  left: 4px; right: 4px;
+  top: 5px; height: 4px;
+  background: #2a3a55;
+  border-radius: 1px;
+}
+.slot-label .icon::after {
+  content: "";
+  position: absolute;
+  left: 6px; right: 6px;
+  top: 15px; height: 6px;
+  background: #2a3a55;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 1px #fff inset;
+}
+
+.action-row {
+  position: absolute;
+  left: 44px;
+  right: 44px;
+  bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+.action-btn {
+  width: 320px;
+  height: 92px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255,255,255,.9);
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 2px 2px rgba(0,0,0,.3);
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.55) inset,
+    0 -10px 22px rgba(0,0,0,.18) inset,
+    0 8px 16px rgba(15, 40, 80, .28);
+}
+.action-btn::before {
+  content: "";
+  position: absolute;
+  top: 6px; left: 18px; right: 18px;
+  height: 36%;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,.55) 0%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
+}
+.action-btn.cancel {
+  background:
+    linear-gradient(
+      to bottom,
+      #ffd5a8 0%,
+      #ff9148 28%,
+      #f26217 62%,
+      #c84a08 100%
+    );
+}
+.action-btn.confirm {
+  background:
+    linear-gradient(
+      to bottom,
+      #d7efb6 0%,
+      #8fc55a 30%,
+      #4f9a2b 65%,
+      #2e6f15 100%
+    );
+}
+
+/* ========================================================================
+   Card / Passbook insert screen
+   ======================================================================== */
+
+.atm-body.insert {
+  display: block;
+  padding: 18px 44px 36px;
+}
+
+.insert-panel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(80, 110, 150, .45);
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset;
+}
+
+.insert-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(140, 170, 210, 0) 0px,
+      rgba(140, 170, 210, 0) 8px,
+      rgba(140, 170, 210, .08) 8px,
+      rgba(140, 170, 210, .08) 9px
+    );
+  pointer-events: none;
+}
+
+.insert-titlebar {
+  position: relative;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(
+      to bottom,
+      #c9d2dc 0%,
+      #aebac8 60%,
+      #94a2b3 100%
+    );
+  border-bottom: 1px solid rgba(80, 100, 130, .35);
+  box-shadow: 0 1px 0 rgba(255,255,255,.6) inset;
+}
+.insert-titlebar h1 {
+  margin: 0;
+  font-size: 46px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #1c1c1c;
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+}
+
+.insert-prompt {
+  margin: 40px 0 0;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1c1c1c;
+}
+.insert-prompt .accent {
+  color: #1f6fd1;
+}
+
+.illus-row {
+  position: relative;
+  margin: 36px auto 0;
+  width: 100%;
+  max-width: 1080px;
+  height: 280px;
+  display: grid;
+  grid-template-columns: 1fr 1.05fr 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 0 30px;
+}
+
+.illus-side {
+  position: relative;
+  height: 220px;
+  border: 1.5px solid #c2cdda;
+  border-radius: 10px;
+  background:
+    linear-gradient(
+      to bottom right,
+      #f3f6fb 0%,
+      #e6ecf3 100%
+    );
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 4px 10px rgba(40, 70, 120, .12);
+  overflow: hidden;
+}
+
+.passbook {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 26px 22px;
+  gap: 0;
+}
+.passbook .slot-bar {
+  position: relative;
+  height: 38px;
+  border-radius: 4px 4px 2px 2px;
+  background:
+    linear-gradient(to bottom, #c8d1de 0%, #95a1b3 50%, #6f7d92 100%);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.4) inset,
+    0 1px 0 rgba(255,255,255,.6);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  z-index: 2;
+}
+.passbook .slot-bar::before {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px;
+  top: 8px; bottom: 8px;
+  border-radius: 2px;
+  background: #1a1d24;
+  box-shadow: 0 1px 2px rgba(0,0,0,.6) inset;
+}
+.passbook .slot-bar .label {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.9);
+  padding: 3px 8px;
+  border-radius: 3px;
+  z-index: 1;
+}
+.passbook .slot-bar .label .ko { font-size: 14px; font-weight: 800; color: #222; letter-spacing: -0.02em; }
+.passbook .slot-bar .label .en { font-size: 10px; font-weight: 700; color: #6a7689; }
+.passbook .slot-bar .label .ic { width: 16px; height: 12px; border: 1.5px solid #2a3a55; border-radius: 2px; position: relative; }
+.passbook .slot-bar .label .ic::before { content: ""; position: absolute; inset: 2px 2px auto 2px; height: 2px; background: #2a3a55; }
+
+.passbook .book {
+  position: relative;
+  flex: 1;
+  margin: -2px 8px 0;
+  border: 1px solid #c8d1de;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background:
+    linear-gradient(to bottom, #f6f8fb 0%, #ffffff 14%, #ffffff 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 18px 22px 14px;
+  gap: 18px;
+  box-shadow: 0 4px 8px rgba(20, 40, 70, .15);
+  z-index: 1;
+}
+.passbook .book::before {
+  content: "";
+  position: absolute;
+  top: 4px; bottom: 4px;
+  left: 50%;
+  width: 6px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(80,100,130,.18) 50%, rgba(0,0,0,0) 100%);
+}
+.passbook .book .col { display: flex; flex-direction: column; gap: 7px; }
+.passbook .book .line { height: 5px; background: #c9d3df; border-radius: 2px; }
+.passbook .book .line.short { width: 60%; }
+.passbook .book .line.med   { width: 85%; }
+
+.cardslot {
+  position: relative;
+  display: block;
+  padding: 22px 18px;
+}
+.cardslot .slot-bar {
+  position: relative;
+  height: 38px;
+  border-radius: 4px 4px 2px 2px;
+  background:
+    linear-gradient(to bottom, #c8d1de 0%, #95a1b3 55%, #6f7d92 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.6) inset,
+    0 2px 4px rgba(0,0,0,.25);
+  z-index: 3;
+}
+.cardslot .slot-bar::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 6%; right: 6%;
+  height: 5px;
+  background: #0a0d14;
+  border-radius: 2px;
+  transform: translateY(-50%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.75) inset;
+}
+.cardslot .card-back {
+  position: absolute;
+  top: 54px;
+  left: 14%;
+  width: 76%;
+  height: 96px;
+  border-radius: 0 0 10px 10px;
+  background:
+    linear-gradient(135deg, #2a3a78 0%, #142058 55%, #0a1340 100%);
+  box-shadow:
+    0 6px 14px rgba(10, 25, 60, .35),
+    0 1px 0 rgba(255,255,255,.2) inset;
+  z-index: 1;
+}
+.cardslot .card-back::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 8px;
+  height: 18px;
+  background: rgba(0,0,0,.4);
+}
+.cardslot .card-front {
+  position: absolute;
+  top: 62px;
+  left: 10%;
+  width: 80%;
+  height: 96px;
+  border-radius: 0 0 12px 12px;
+  background:
+    linear-gradient(135deg, #e6f1fa 0%, #c2dcef 55%, #9cc2de 100%);
+  box-shadow:
+    0 8px 14px rgba(20, 50, 100, .30),
+    0 1px 0 rgba(255,255,255,.9) inset;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 14px 12px;
+  gap: 6px;
+  overflow: hidden;
+  z-index: 2;
+}
+.cardslot .card-front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0) 10px,
+      rgba(255,255,255,.25) 10px,
+      rgba(255,255,255,.25) 11px
+    );
+  pointer-events: none;
+}
+.cardslot .card-front .ko { position: relative; font-size: 17px; font-weight: 800; color: #1c4a7a; letter-spacing: -0.02em; }
+.cardslot .card-front .en { position: relative; font-size: 10px; font-weight: 700; color: #34618a; }
+.cardslot .card-front .ic { position: relative; margin-left: auto; width: 22px; height: 16px; border: 1.5px solid #1c4a7a; border-radius: 2px; background: #fff; }
+
+.atm-illus {
+  position: relative;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.atm-illus .body {
+  position: relative;
+  width: 220px;
+  height: 230px;
+  border-radius: 14px 14px 10px 10px;
+  background:
+    linear-gradient(to bottom, #e8edf3 0%, #c5cfdb 70%, #aebac8 100%);
+  border: 1.5px solid #94a2b3;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 8px 18px rgba(40, 70, 120, .25);
+}
+.atm-illus .screen-top {
+  position: absolute;
+  top: 14px; left: 18px; right: 70px;
+  height: 95px;
+  border-radius: 6px;
+  background:
+    linear-gradient(to bottom, #cfe5f3 0%, #8fb6d4 100%);
+  border: 1.5px solid #6a8aa8;
+  box-shadow: 0 2px 3px rgba(0,0,0,.25) inset;
+}
+.atm-illus .brand-tag {
+  position: absolute;
+  top: 4px; right: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: rgba(80, 110, 150, .55);
+}
+.atm-illus .screen-bot {
+  position: absolute;
+  top: 122px; left: 30px; right: 60px;
+  height: 50px;
+  border-radius: 4px;
+  background: #1a1d24;
+  box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+}
+.atm-illus .keypad {
+  position: absolute;
+  bottom: 14px; right: 18px;
+  width: 60px; height: 60px;
+  border-radius: 4px;
+  background: #d6dde7;
+  border: 1px solid #a3afbf;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 4px;
+}
+.atm-illus .keypad span { background: #f2f5f9; border-radius: 2px; }
+
+.atm-illus .ring {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.5px dashed #2bbf3a;
+  background: rgba(43, 191, 58, 0.08);
+  box-shadow: 0 0 8px rgba(43, 191, 58, .35);
+}
+.atm-illus .ring.left  { left: 36px; top: 78px; }
+.atm-illus .ring.right { right: 14px; top: 30px; }
+
+.atm-illus .slot-detail {
+  position: absolute;
+  top: 20px; right: 14px;
+  width: 48px; height: 34px;
+  border-radius: 4px;
+  background:
+    linear-gradient(to bottom, #d8dfe8 0%, #a4b1c1 100%);
+  border: 1px solid #6a7d92;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 2px 3px rgba(0,0,0,.2);
+  overflow: hidden;
+}
+.atm-illus .slot-detail svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.illus-row .connector {
+  position: absolute;
+  top: 50%;
+  width: 110px;
+  height: 22px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.illus-row .connector.left  { left:  calc(33.3% - 55px); }
+.illus-row .connector.right { right: calc(33.3% - 55px); transform: translateY(-50%) scaleX(-1); }
+.illus-row .connector svg { width: 100%; height: 100%; display: block; }
+
+.action-row.single {
+  justify-content: flex-start;
+}
+.action-row.single .action-btn.cancel {
+  width: 260px;
+  height: 78px;
+  font-size: 36px;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
 }
