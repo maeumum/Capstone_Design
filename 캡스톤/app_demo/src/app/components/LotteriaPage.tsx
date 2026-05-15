@@ -371,17 +371,17 @@ const categories: { id: Category; label: string; short: string }[] = [
 
 function PracticeLogo() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative h-12 w-12 rounded-full bg-white/18 backdrop-blur-sm ring-1 ring-white/35">
-        <div className="absolute left-2 right-2 top-3 h-2 rounded-full bg-[#ffe16c]" />
-        <div className="absolute left-3 right-3 top-[1.45rem] h-2 rounded-full bg-[#ff8a47]" />
-        <div className="absolute left-2.5 right-2.5 top-[1.9rem] h-2 rounded-full bg-[#ffdd74]" />
+    <div className="flex items-center gap-1.5">
+      <div className="relative h-7 w-7 rounded-full bg-white/18 backdrop-blur-sm ring-1 ring-white/35 flex-shrink-0">
+        <div className="absolute left-1 right-1 top-1.5 h-1 rounded-full bg-[#ffe16c]" />
+        <div className="absolute left-1.5 right-1.5 top-[0.9rem] h-1 rounded-full bg-[#ff8a47]" />
+        <div className="absolute left-1 right-1 top-[1.2rem] h-1 rounded-full bg-[#ffdd74]" />
       </div>
       <div>
-        <p className="text-white/75" style={{ fontSize: "13px", fontWeight: "700", letterSpacing: "0.16em" }}>
+        <p className="text-white/75" style={{ fontSize: "9px", fontWeight: "700", letterSpacing: "0.1em" }}>
           FASTFOOD PRACTICE
         </p>
-        <p className="text-white" style={{ fontSize: "27px", fontWeight: "900", letterSpacing: "0.04em" }}>
+        <p className="text-white" style={{ fontSize: "14px", fontWeight: "900", letterSpacing: "0.02em" }}>
           LOTTERIA
         </p>
       </div>
@@ -399,21 +399,18 @@ function Header({
   onBack?: () => void;
 }) {
   return (
-    <div className="bg-[linear-gradient(135deg,#b71b1f_0%,#d6292d_58%,#ef7630_100%)] px-4 py-4 text-white shadow-lg">
-      <div className="mx-auto flex max-w-6xl items-center gap-4">
+    <div className="bg-[linear-gradient(135deg,#b71b1f_0%,#d6292d_58%,#ef7630_100%)] px-3 py-3 text-white shadow-lg flex-shrink-0">
+      <div className="flex items-center gap-2">
         {onBack ? (
-          <button
-            onClick={onBack}
-            className="rounded-2xl bg-white/15 p-3 backdrop-blur-sm active:scale-95"
-          >
-            <ArrowLeft size={28} />
+          <button onClick={onBack} className="rounded-xl bg-white/15 p-2 active:scale-95">
+            <ArrowLeft size={18} />
           </button>
         ) : (
-          <div className="w-14" />
+          <div className="w-9" />
         )}
-        <div className="flex-1">
-          <p style={{ fontSize: "28px", fontWeight: "900" }}>{title}</p>
-          {subtitle && <p className="text-white/80" style={{ fontSize: "16px" }}>{subtitle}</p>}
+        <div className="flex-1 min-w-0">
+          <p className="truncate" style={{ fontSize: "15px", fontWeight: "900" }}>{title}</p>
+          {subtitle && <p className="text-white/80 truncate" style={{ fontSize: "11px" }}>{subtitle}</p>}
         </div>
         <PracticeLogo />
       </div>
@@ -527,82 +524,55 @@ export default function LotteriaPage() {
 
   if (step === "welcome") {
     return (
-      <div className="min-h-screen bg-[radial-gradient(circle_at_top,#fff2dc_0%,#ffe7cf_34%,#f8dfd5_100%)]">
-        <div className="mx-auto max-w-6xl p-4 sm:p-6">
-          <button
-            onClick={() => navigate("/")}
-            className="mb-6 flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-md active:scale-95"
-          >
-            <ArrowLeft size={30} />
-            <span style={{ fontSize: "24px", fontWeight: "700" }}>뒤로 가기</span>
-          </button>
+      <div className="min-h-full flex flex-col bg-[radial-gradient(circle_at_top,#fff2dc_0%,#ffe7cf_34%,#f8dfd5_100%)]">
+        <div className="bg-[linear-gradient(140deg,#bb1d21_0%,#d6292d_58%,#ef7630_100%)] px-3 py-3 text-white flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/")} className="rounded-xl bg-white/15 p-2 active:scale-95">
+              <ArrowLeft size={18} />
+            </button>
+            <div className="flex-1">
+              <p style={{ fontSize: "14px", fontWeight: "700" }}>학습용 패스트푸드 키오스크</p>
+              <p style={{ fontSize: "12px" }} className="text-white/75">주문 방식을 선택해 주세요</p>
+            </div>
+            <PracticeLogo />
+          </div>
+        </div>
 
-          <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_50px_rgba(120,42,10,0.16)]">
-            <div className="bg-[linear-gradient(140deg,#bb1d21_0%,#d6292d_58%,#ef7630_100%)] px-6 py-8 text-white sm:px-10 sm:py-10">
-              <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div className="max-w-2xl">
-                  <PracticeLogo />
-                  <p className="mt-6 text-white/80" style={{ fontSize: "18px", fontWeight: "700" }}>
-                    학습용 패스트푸드 키오스크
-                  </p>
-                  <h1 className="mt-2" style={{ fontSize: "48px", fontWeight: "900", lineHeight: 1.08 }}>
-                    주문 방식을 선택하고
-                    <br />
-                    실제와 비슷한 흐름으로 연습해 보세요
-                  </h1>
-                  <p className="mt-4 max-w-xl text-white/85" style={{ fontSize: "18px", lineHeight: 1.6 }}>
-                    공식 키오스크를 그대로 복제하지 않고, 패스트푸드점 주문 흐름을 쉽게 익히도록
-                    재구성한 연습용 화면입니다.
-                  </p>
-                </div>
-
-                <div className="grid gap-5 md:grid-cols-2">
-                  <button
-                    onClick={() => {
-                      setOrderType("dine-in");
-                      setStep("menu");
-                    }}
-                    className="min-h-[250px] rounded-[1.75rem] bg-white/95 p-8 text-left text-slate-900 shadow-xl transition-all active:scale-95"
-                  >
-                    <div className="mb-5 inline-flex rounded-2xl bg-red-50 p-4 text-red-600">
-                      <Home size={44} />
-                    </div>
-                    <p style={{ fontSize: "34px", fontWeight: "900" }}>매장에서 먹기</p>
-                    <p className="mt-3 text-slate-600" style={{ fontSize: "18px", lineHeight: 1.6 }}>
-                      자리에서 식사할 때 선택합니다. 주문 번호가 호출되면 카운터에서 받으세요.
-                    </p>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setOrderType("takeout");
-                      setStep("menu");
-                    }}
-                    className="min-h-[250px] rounded-[1.75rem] bg-[#fff5d9] p-8 text-left text-slate-900 shadow-xl transition-all active:scale-95"
-                  >
-                    <div className="mb-5 inline-flex rounded-2xl bg-white p-4 text-[#d96a12]">
-                      <Package size={44} />
-                    </div>
-                    <p style={{ fontSize: "34px", fontWeight: "900" }}>포장하기</p>
-                    <p className="mt-3 text-slate-700" style={{ fontSize: "18px", lineHeight: 1.6 }}>
-                      집이나 이동 중 먹을 음식일 때 선택합니다. 포장 완료 시 주문번호를 확인하세요.
-                    </p>
-                  </button>
-                </div>
+        <div className="flex-1 p-3 flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3 flex-1">
+            <button
+              onClick={() => { setOrderType("dine-in"); setStep("menu"); }}
+              className="rounded-2xl bg-white p-4 text-left text-slate-900 shadow-lg active:scale-95 transition-all flex flex-col"
+            >
+              <div className="inline-flex rounded-xl bg-red-50 p-3 text-red-600 mb-3">
+                <Home size={26} />
               </div>
-            </div>
+              <p style={{ fontSize: "17px", fontWeight: "900" }}>매장에서 먹기</p>
+              <p className="mt-2 text-slate-500 flex-1" style={{ fontSize: "12px", lineHeight: 1.5 }}>
+                자리에서 식사할 때 선택합니다.
+              </p>
+            </button>
 
-            <div className="grid gap-4 bg-[#fffaf2] px-6 py-6 text-slate-700 sm:grid-cols-3 sm:px-10">
-              {[
-                "버거는 단품과 세트 중 선택",
-                "세트는 사이드와 음료를 순서대로 선택",
-                "디저트 메뉴도 장바구니에 함께 담기",
-              ].map((tip) => (
-                <div key={tip} className="rounded-2xl bg-white p-4 shadow-sm">
-                  <p style={{ fontSize: "18px", fontWeight: "700" }}>{tip}</p>
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={() => { setOrderType("takeout"); setStep("menu"); }}
+              className="rounded-2xl bg-[#fff5d9] p-4 text-left text-slate-900 shadow-lg active:scale-95 transition-all flex flex-col"
+            >
+              <div className="inline-flex rounded-xl bg-white p-3 text-[#d96a12] mb-3">
+                <Package size={26} />
+              </div>
+              <p style={{ fontSize: "17px", fontWeight: "900" }}>포장하기</p>
+              <p className="mt-2 text-slate-500 flex-1" style={{ fontSize: "12px", lineHeight: 1.5 }}>
+                이동 중 먹을 때 선택합니다.
+              </p>
+            </button>
+          </div>
+
+          <div className="rounded-2xl bg-white/70 p-3 space-y-2">
+            {["버거는 단품과 세트 중 선택", "세트는 사이드·음료 순서로 선택", "디저트도 장바구니에 함께 담기"].map((tip) => (
+              <div key={tip} className="rounded-xl bg-white px-3 py-2 shadow-sm">
+                <p style={{ fontSize: "13px", fontWeight: "700" }}>{tip}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -611,176 +581,104 @@ export default function LotteriaPage() {
 
   if (step === "menu") {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
         <Header
-          title="주문할 메뉴를 선택해 주세요"
+          title="메뉴를 선택해 주세요"
           subtitle={orderType === "dine-in" ? "매장에서 먹기" : "포장 주문"}
           onBack={() => setStep("welcome")}
         />
 
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-5 lg:px-6">
-          <div className="rounded-[1.75rem] bg-[linear-gradient(120deg,#fff3d7_0%,#fff9ef_100%)] p-5 shadow-sm">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-[#b24a16]" style={{ fontSize: "18px", fontWeight: "800" }}>
-                  오늘의 추천
-                </p>
-                <p className="mt-1 text-slate-900" style={{ fontSize: "30px", fontWeight: "900" }}>
-                  세트로 많이 찾는 메뉴를 먼저 보여드려요
-                </p>
-                <p className="mt-2 text-slate-600" style={{ fontSize: "16px" }}>
-                  버거·치킨은 세트 구성이 가능하고, 디저트는 장바구니에 바로 담을 수 있어요.
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[#cf5f12] shadow-sm">
-                <Sparkles size={18} />
-                <span style={{ fontSize: "15px", fontWeight: "800" }}>학습용 키오스크 화면</span>
-              </div>
-            </div>
+        {/* Category tabs */}
+        <div className="overflow-x-auto bg-white border-b border-slate-100 flex-shrink-0">
+          <div className="flex min-w-max gap-1 px-2 py-2">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`rounded-xl px-3 py-2 transition-all ${
+                  activeCategory === category.id
+                    ? "bg-[linear-gradient(120deg,#c41e25_0%,#ef7630_100%)] text-white shadow"
+                    : "bg-[#f5f1eb] text-slate-600"
+                }`}
+                style={{ fontSize: "13px", fontWeight: "900" }}
+              >
+                {category.short}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
-            <div className="space-y-5">
-              <div className="overflow-x-auto rounded-[1.5rem] bg-white p-2 shadow-sm">
-                <div className="flex min-w-max gap-2">
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setActiveCategory(category.id)}
-                      className={`rounded-2xl px-5 py-4 transition-all ${
-                        activeCategory === category.id
-                          ? "bg-[linear-gradient(120deg,#c41e25_0%,#ef7630_100%)] text-white shadow-md"
-                          : "bg-[#f5f1eb] text-slate-600"
-                      }`}
-                    >
-                      <p style={{ fontSize: "19px", fontWeight: "900" }}>{category.short}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Main area: menu list + cart bar */}
+        <div className="flex-1 overflow-y-auto px-3 py-3">
+          <div className="grid grid-cols-2 gap-3">
+            {filteredItems.map((item) => {
+              const directAdd = !item.settable && item.category !== "burger" && item.category !== "chicken";
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => (directAdd ? addQuickItem(item) : openItem(item))}
+                  className="overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 active:scale-[0.98] transition-all"
+                >
+                  <div className="relative bg-[linear-gradient(180deg,#fff7ea_0%,#ffeccd_100%)] p-2">
+                    <ImageWithFallback
+                      src={item.image}
+                      alt={item.name}
+                      className="h-[100px] w-full rounded-xl object-cover"
+                    />
+                    {item.badge && (
+                      <span
+                        className={`absolute left-3 top-3 rounded-full px-2 py-0.5 text-white ${
+                          item.badge === "BEST" ? "bg-[#d6292d]" : "bg-[#f28b2e]"
+                        }`}
+                        style={{ fontSize: "10px", fontWeight: "900" }}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-slate-900" style={{ fontSize: "13px", fontWeight: "900", lineHeight: 1.2 }}>
+                      {item.name}
+                    </p>
+                    <p style={{ color: BRAND_RED, fontSize: "14px", fontWeight: "900", marginTop: "4px" }}>
+                      {item.price.toLocaleString()}원
+                    </p>
+                    <div className={`mt-2 rounded-xl px-2 py-1 text-center text-white ${directAdd ? "bg-[#cf5f12]" : "bg-[#d6292d]"}`}
+                      style={{ fontSize: "12px", fontWeight: "900" }}>
+                      {directAdd ? "바로 담기" : "선택하기"}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredItems.map((item) => {
-                  const directAdd = !item.settable && item.category !== "burger" && item.category !== "chicken";
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => (directAdd ? addQuickItem(item) : openItem(item))}
-                      className="overflow-hidden rounded-[1.6rem] bg-white text-left shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 active:scale-[0.99]"
-                    >
-                      <div className="relative bg-[linear-gradient(180deg,#fff7ea_0%,#ffeccd_100%)] p-4">
-                        <ImageWithFallback
-                          src={item.image}
-                          alt={item.name}
-                          className="h-[190px] w-full rounded-[1.25rem] object-cover"
-                        />
-                        <div className="absolute left-6 top-6 flex gap-2">
-                          {item.badge && (
-                            <span
-                              className={`rounded-full px-3 py-1 text-white ${
-                                item.badge === "BEST" ? "bg-[#d6292d]" : "bg-[#f28b2e]"
-                              }`}
-                              style={{ fontSize: "12px", fontWeight: "900" }}
-                            >
-                              {item.badge}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 p-4">
-                        <div className="flex flex-wrap gap-2">
-                          {(item.cardTags ?? []).map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full bg-[#fff3d7] px-3 py-1 text-[#be5a11]"
-                              style={{ fontSize: "12px", fontWeight: "800" }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div>
-                          <p className="text-slate-900" style={{ fontSize: "24px", fontWeight: "900", lineHeight: 1.2 }}>
-                            {item.name}
-                          </p>
-                          <p className="mt-2 text-slate-600" style={{ fontSize: "15px", lineHeight: 1.6 }}>
-                            {item.description}
-                          </p>
-                        </div>
-
-                        <div className="flex items-end justify-between">
-                          <div>
-                            <p style={{ color: BRAND_RED, fontSize: "26px", fontWeight: "900" }}>
-                              {item.price.toLocaleString()}원
-                            </p>
-                            <p className="text-slate-400" style={{ fontSize: "13px", fontWeight: "700" }}>
-                              {directAdd ? "누르면 바로 장바구니" : "상세 옵션 선택"}
-                            </p>
-                          </div>
-                          <div
-                            className={`rounded-2xl px-4 py-3 text-center text-white ${
-                              directAdd ? "bg-[#cf5f12]" : "bg-[#d6292d]"
-                            }`}
-                            style={{ fontSize: "15px", fontWeight: "900" }}
-                          >
-                            {directAdd ? "바로 담기" : "선택하기"}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm">
-              <div className="rounded-[1.5rem] bg-[linear-gradient(160deg,#cf2228_0%,#ef7630_100%)] p-5 text-white">
-                <p style={{ fontSize: "17px", fontWeight: "800" }}>현재 주문</p>
-                <p className="mt-2" style={{ fontSize: "34px", fontWeight: "900" }}>
-                  {totalCount}개
+        {/* Sticky cart bar at bottom */}
+        <div className="bg-white border-t border-slate-100 px-3 py-2 flex-shrink-0 flex items-center gap-3">
+          <div className="flex-1">
+            {cart.length === 0 ? (
+              <p className="text-slate-400" style={{ fontSize: "13px" }}>장바구니가 비어 있어요</p>
+            ) : (
+              <>
+                <p className="text-slate-900" style={{ fontSize: "13px", fontWeight: "800" }}>
+                  {totalCount}개 담김
                 </p>
-                <p className="mt-1 text-white/85" style={{ fontSize: "16px" }}>
+                <p style={{ color: BRAND_RED, fontSize: "14px", fontWeight: "900" }}>
                   {totalPrice.toLocaleString()}원
                 </p>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {cart.length === 0 ? (
-                  <div className="rounded-2xl bg-[#f8f4ef] p-5 text-center text-slate-500">
-                    <ShoppingCart className="mx-auto mb-3" size={32} />
-                    <p style={{ fontSize: "17px", fontWeight: "700" }}>장바구니가 비어 있어요</p>
-                    <p className="mt-1" style={{ fontSize: "14px" }}>
-                      메뉴를 선택하면 이곳에 표시됩니다.
-                    </p>
-                  </div>
-                ) : (
-                  cart.slice(0, 4).map((item) => (
-                    <div key={item.uid} className="rounded-2xl bg-[#f8f4ef] p-4">
-                      <p className="text-slate-900" style={{ fontSize: "17px", fontWeight: "800" }}>
-                        {item.menu.name}
-                      </p>
-                      <p className="mt-1 text-slate-500" style={{ fontSize: "13px" }}>
-                        {OPTION_LABEL[item.optionType]}
-                        {item.side ? ` · ${item.side}` : ""}
-                        {item.drink ? ` · ${item.drink}` : ""}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <button
-                onClick={() => setStep("cart")}
-                disabled={cart.length === 0}
-                className="mt-5 w-full rounded-2xl bg-[#d6292d] py-5 text-white disabled:bg-slate-300"
-                style={{ fontSize: "21px", fontWeight: "900" }}
-              >
-                장바구니 보기
-              </button>
-            </aside>
+              </>
+            )}
           </div>
+          <button
+            onClick={() => setStep("cart")}
+            disabled={cart.length === 0}
+            className="flex items-center gap-1.5 rounded-xl bg-[#d6292d] px-4 py-2.5 text-white disabled:bg-slate-300"
+            style={{ fontSize: "14px", fontWeight: "900" }}
+          >
+            <ShoppingCart size={16} />
+            장바구니
+          </button>
         </div>
       </div>
     );
@@ -794,105 +692,71 @@ export default function LotteriaPage() {
     ];
 
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
         <Header
           title={selectedItem.name}
           subtitle="메뉴 상세와 구성 선택"
-          onBack={() => {
-            setStep("menu");
-            resetSelections();
-          }}
+          onBack={() => { setStep("menu"); resetSelections(); }}
         />
 
-        <div className="mx-auto max-w-5xl px-4 py-5 lg:px-6">
-          <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[1.8rem] bg-white p-5 shadow-sm">
-              <ImageWithFallback
-                src={selectedItem.image}
-                alt={selectedItem.name}
-                className="h-[320px] w-full rounded-[1.5rem] object-cover"
-              />
-            </div>
-
-            <div className="rounded-[1.8rem] bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                {selectedItem.badge && (
-                  <span
-                    className={`rounded-full px-3 py-1 text-white ${
-                      selectedItem.badge === "BEST" ? "bg-[#d6292d]" : "bg-[#f28b2e]"
-                    }`}
-                    style={{ fontSize: "12px", fontWeight: "900" }}
-                  >
-                    {selectedItem.badge}
-                  </span>
-                )}
-                <span className="rounded-full bg-[#fff3d7] px-3 py-1 text-[#be5a11]" style={{ fontSize: "12px", fontWeight: "800" }}>
-                  연습용 메뉴
-                </span>
-              </div>
-
-              <p className="mt-4 text-slate-900" style={{ fontSize: "34px", fontWeight: "900", lineHeight: 1.15 }}>
-                {selectedItem.name}
-              </p>
-              <p className="mt-3 text-slate-600" style={{ fontSize: "17px", lineHeight: 1.7 }}>
-                {selectedItem.description}
-              </p>
-              <p className="mt-4" style={{ color: BRAND_RED, fontSize: "34px", fontWeight: "900" }}>
-                {selectedItem.price.toLocaleString()}원부터
-              </p>
-
-              {selectedItem.settable ? (
-                <div className="mt-6 space-y-3">
-                  <p className="text-slate-900" style={{ fontSize: "21px", fontWeight: "900" }}>
-                    구성 선택
-                  </p>
-                  {optionCards.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setSelectedOption(option.id)}
-                      className={`flex w-full items-center justify-between rounded-[1.25rem] border-2 px-5 py-5 text-left transition-all ${
-                        selectedOption === option.id
-                          ? "border-[#d6292d] bg-[#fff4f4]"
-                          : "border-[#ece5da] bg-[#fcfaf7]"
-                      }`}
-                    >
-                      <div>
-                        <p className="text-slate-900" style={{ fontSize: "21px", fontWeight: "900" }}>
-                          {option.title}
-                        </p>
-                        <p className="mt-1 text-slate-500" style={{ fontSize: "15px" }}>
-                          {option.desc}
-                        </p>
-                      </div>
-                      <p style={{ color: BRAND_RED, fontSize: "22px", fontWeight: "900" }}>
-                        {(selectedItem.price + OPTION_EXTRA[option.id]).toLocaleString()}원
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-6 rounded-[1.25rem] bg-[#f8f4ef] p-5 text-slate-600">
-                  <p style={{ fontSize: "17px", fontWeight: "700" }}>
-                    이 메뉴는 단품으로만 바로 주문됩니다.
-                  </p>
-                </div>
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+          <div className="rounded-2xl bg-white p-3 shadow-sm">
+            <ImageWithFallback
+              src={selectedItem.image}
+              alt={selectedItem.name}
+              className="h-[160px] w-full rounded-xl object-cover"
+            />
+            <div className="flex items-center gap-2 mt-3">
+              {selectedItem.badge && (
+                <span className={`rounded-full px-2 py-0.5 text-white ${selectedItem.badge === "BEST" ? "bg-[#d6292d]" : "bg-[#f28b2e]"}`}
+                  style={{ fontSize: "11px", fontWeight: "900" }}>{selectedItem.badge}</span>
               )}
-
-              <button
-                onClick={() => {
-                  if (!selectedItem.settable || selectedOption === "single") {
-                    addToCartFromSelection();
-                    return;
-                  }
-                  setStep("set-side");
-                }}
-                className="mt-6 w-full rounded-2xl bg-[#d6292d] py-5 text-white"
-                style={{ fontSize: "22px", fontWeight: "900" }}
-              >
-                {selectedItem.settable && selectedOption !== "single" ? "다음: 사이드 선택" : "장바구니에 담기"}
-              </button>
+              <span className="rounded-full bg-[#fff3d7] px-2 py-0.5 text-[#be5a11]" style={{ fontSize: "11px", fontWeight: "800" }}>연습용</span>
             </div>
+            <p className="mt-2 text-slate-900" style={{ fontSize: "17px", fontWeight: "900" }}>{selectedItem.name}</p>
+            <p className="mt-1 text-slate-500" style={{ fontSize: "12px", lineHeight: 1.5 }}>{selectedItem.description}</p>
+            <p className="mt-2" style={{ color: BRAND_RED, fontSize: "18px", fontWeight: "900" }}>
+              {selectedItem.price.toLocaleString()}원부터
+            </p>
           </div>
+
+          {selectedItem.settable ? (
+            <div className="space-y-2">
+              <p className="text-slate-700 px-1" style={{ fontSize: "13px", fontWeight: "900" }}>구성 선택</p>
+              {optionCards.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setSelectedOption(option.id)}
+                  className={`flex w-full items-center justify-between rounded-xl border-2 px-3 py-3 text-left transition-all ${
+                    selectedOption === option.id ? "border-[#d6292d] bg-[#fff4f4]" : "border-[#ece5da] bg-white"
+                  }`}
+                >
+                  <div>
+                    <p className="text-slate-900" style={{ fontSize: "14px", fontWeight: "900" }}>{option.title}</p>
+                    <p className="text-slate-500" style={{ fontSize: "12px" }}>{option.desc}</p>
+                  </div>
+                  <p style={{ color: BRAND_RED, fontSize: "14px", fontWeight: "900" }}>
+                    {(selectedItem.price + OPTION_EXTRA[option.id]).toLocaleString()}원
+                  </p>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl bg-[#f8f4ef] p-3 text-slate-600">
+              <p style={{ fontSize: "13px", fontWeight: "700" }}>이 메뉴는 단품으로만 주문됩니다.</p>
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              if (!selectedItem.settable || selectedOption === "single") { addToCartFromSelection(); return; }
+              setStep("set-side");
+            }}
+            className="w-full rounded-xl bg-[#d6292d] py-3 text-white"
+            style={{ fontSize: "15px", fontWeight: "900" }}
+          >
+            {selectedItem.settable && selectedOption !== "single" ? "다음: 사이드 선택" : "장바구니에 담기"}
+          </button>
         </div>
       </div>
     );
@@ -900,36 +764,30 @@ export default function LotteriaPage() {
 
   if (step === "set-side" && selectedItem) {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
         <Header
           title="세트 사이드 선택"
           subtitle={`${selectedItem.name} · ${OPTION_LABEL[selectedOption]}`}
           onBack={() => setStep("item-detail")}
         />
 
-        <div className="mx-auto max-w-4xl px-4 py-5 lg:px-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+          <div className="grid grid-cols-3 gap-2">
             {SIDE_OPTIONS.map((side) => (
               <button
                 key={side.name}
                 onClick={() => setSelectedSide(side.name)}
-                className={`rounded-[1.5rem] border-2 p-5 text-left shadow-sm transition-all ${
-                  selectedSide === side.name
-                    ? "border-[#d6292d] bg-[#fff4f4]"
-                    : "border-transparent bg-white"
+                className={`rounded-2xl border-2 p-2 text-left shadow-sm transition-all ${
+                  selectedSide === side.name ? "border-[#d6292d] bg-[#fff4f4]" : "border-transparent bg-white"
                 }`}
               >
                 <ImageWithFallback
                   src={side.name.includes("치즈") ? foodArt("cheesestick") : foodArt("fries")}
                   alt={side.name}
-                  className="h-[160px] w-full rounded-[1.1rem] object-cover"
+                  className="h-[80px] w-full rounded-xl object-cover"
                 />
-                <p className="mt-4 text-slate-900" style={{ fontSize: "24px", fontWeight: "900" }}>
-                  {side.name}
-                </p>
-                <p className="mt-2 text-slate-500" style={{ fontSize: "15px" }}>
-                  {side.note}
-                </p>
+                <p className="mt-2 text-slate-900" style={{ fontSize: "12px", fontWeight: "900", lineHeight: 1.2 }}>{side.name}</p>
+                <p className="mt-1 text-slate-400" style={{ fontSize: "11px" }}>{side.note}</p>
               </button>
             ))}
           </div>
@@ -937,8 +795,8 @@ export default function LotteriaPage() {
           <button
             onClick={() => setStep("set-drink")}
             disabled={!selectedSide}
-            className="mt-5 w-full rounded-2xl bg-[#d6292d] py-5 text-white disabled:bg-slate-300"
-            style={{ fontSize: "22px", fontWeight: "900" }}
+            className="w-full rounded-xl bg-[#d6292d] py-3 text-white disabled:bg-slate-300"
+            style={{ fontSize: "15px", fontWeight: "900" }}
           >
             다음: 음료 선택
           </button>
@@ -949,36 +807,30 @@ export default function LotteriaPage() {
 
   if (step === "set-drink" && selectedItem) {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
         <Header
           title="세트 음료 선택"
           subtitle={`${selectedItem.name} · ${selectedSide} 선택 완료`}
           onBack={() => setStep("set-side")}
         />
 
-        <div className="mx-auto max-w-4xl px-4 py-5 lg:px-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             {DRINK_OPTIONS.map((drink) => (
               <button
                 key={drink.name}
                 onClick={() => setSelectedDrink(drink.name)}
-                className={`rounded-[1.5rem] border-2 p-5 text-center shadow-sm transition-all ${
-                  selectedDrink === drink.name
-                    ? "border-[#d6292d] bg-[#fff4f4]"
-                    : "border-transparent bg-white"
+                className={`rounded-2xl border-2 p-3 text-center shadow-sm transition-all ${
+                  selectedDrink === drink.name ? "border-[#d6292d] bg-[#fff4f4]" : "border-transparent bg-white"
                 }`}
               >
                 <ImageWithFallback
                   src={foodArt("soda")}
                   alt={drink.name}
-                  className="mx-auto h-[150px] w-full rounded-[1.1rem] object-cover"
+                  className="mx-auto h-[90px] w-full rounded-xl object-cover"
                 />
-                <p className="mt-4 text-slate-900" style={{ fontSize: "22px", fontWeight: "900" }}>
-                  {drink.name}
-                </p>
-                <p className="mt-2 text-slate-500" style={{ fontSize: "14px" }}>
-                  {drink.note}
-                </p>
+                <p className="mt-2 text-slate-900" style={{ fontSize: "14px", fontWeight: "900" }}>{drink.name}</p>
+                <p className="mt-1 text-slate-400" style={{ fontSize: "11px" }}>{drink.note}</p>
               </button>
             ))}
           </div>
@@ -986,8 +838,8 @@ export default function LotteriaPage() {
           <button
             onClick={addToCartFromSelection}
             disabled={!selectedDrink}
-            className="mt-5 w-full rounded-2xl bg-[#d6292d] py-5 text-white disabled:bg-slate-300"
-            style={{ fontSize: "22px", fontWeight: "900" }}
+            className="w-full rounded-xl bg-[#d6292d] py-3 text-white disabled:bg-slate-300"
+            style={{ fontSize: "15px", fontWeight: "900" }}
           >
             장바구니에 담기
           </button>
@@ -998,117 +850,65 @@ export default function LotteriaPage() {
 
   if (step === "cart") {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
-        <Header
-          title="장바구니 확인"
-          subtitle="메뉴 수량과 구성을 확인해 주세요"
-          onBack={() => setStep("menu")}
-        />
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
+        <Header title="장바구니 확인" subtitle="수량과 구성을 확인해 주세요" onBack={() => setStep("menu")} />
 
-        <div className="mx-auto max-w-5xl px-4 py-5 lg:px-6">
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="space-y-4">
-              {cart.length === 0 ? (
-                <div className="rounded-[1.75rem] bg-white p-10 text-center shadow-sm">
-                  <ShoppingCart className="mx-auto mb-4 text-slate-300" size={42} />
-                  <p className="text-slate-600" style={{ fontSize: "24px", fontWeight: "800" }}>
-                    장바구니가 비어 있습니다
-                  </p>
-                </div>
-              ) : (
-                cart.map((item) => (
-                  <div key={item.uid} className="rounded-[1.6rem] bg-white p-4 shadow-sm">
-                    <div className="flex gap-4">
-                      <ImageWithFallback
-                        src={item.menu.image}
-                        alt={item.menu.name}
-                        className="h-28 w-28 rounded-[1rem] object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="text-slate-900" style={{ fontSize: "22px", fontWeight: "900" }}>
-                              {item.menu.name}
-                            </p>
-                            <p className="mt-1 text-slate-500" style={{ fontSize: "15px" }}>
-                              {OPTION_LABEL[item.optionType]}
-                              {item.side ? ` · ${item.side}` : ""}
-                              {item.drink ? ` · ${item.drink}` : ""}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => setCart((prev) => prev.filter((cartItem) => cartItem.uid !== item.uid))}
-                            className="rounded-xl bg-[#fff1f1] p-3 text-[#d6292d] active:scale-95"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center gap-3 rounded-full bg-[#f8f4ef] px-3 py-2">
-                            <button
-                              onClick={() => changeQty(item.uid, -1)}
-                              className="h-10 w-10 rounded-full bg-white text-slate-700 shadow-sm"
-                              style={{ fontSize: "20px", fontWeight: "900" }}
-                            >
-                              -
-                            </button>
-                            <span style={{ fontSize: "20px", fontWeight: "900" }}>{item.qty}</span>
-                            <button
-                              onClick={() => changeQty(item.uid, 1)}
-                              className="h-10 w-10 rounded-full bg-[#d6292d] text-white shadow-sm"
-                              style={{ fontSize: "20px", fontWeight: "900" }}
-                            >
-                              +
-                            </button>
-                          </div>
-                          <p style={{ color: BRAND_RED, fontSize: "25px", fontWeight: "900" }}>
-                            {getItemTotal(item).toLocaleString()}원
-                          </p>
-                        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+          {cart.length === 0 ? (
+            <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
+              <ShoppingCart className="mx-auto mb-3 text-slate-300" size={32} />
+              <p className="text-slate-500" style={{ fontSize: "14px", fontWeight: "700" }}>장바구니가 비어 있습니다</p>
+            </div>
+          ) : (
+            cart.map((item) => (
+              <div key={item.uid} className="rounded-2xl bg-white p-3 shadow-sm">
+                <div className="flex gap-3">
+                  <ImageWithFallback src={item.menu.image} alt={item.menu.name} className="h-16 w-16 rounded-xl object-cover flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-slate-900 truncate" style={{ fontSize: "14px", fontWeight: "900" }}>{item.menu.name}</p>
+                        <p className="text-slate-400" style={{ fontSize: "11px" }}>
+                          {OPTION_LABEL[item.optionType]}{item.side ? ` · ${item.side}` : ""}{item.drink ? ` · ${item.drink}` : ""}
+                        </p>
                       </div>
+                      <button onClick={() => setCart((prev) => prev.filter((ci) => ci.uid !== item.uid))}
+                        className="rounded-lg bg-[#fff1f1] p-1.5 text-[#d6292d] flex-shrink-0">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2 rounded-full bg-[#f8f4ef] px-2 py-1">
+                        <button onClick={() => changeQty(item.uid, -1)}
+                          className="h-7 w-7 rounded-full bg-white text-slate-700 shadow-sm"
+                          style={{ fontSize: "16px", fontWeight: "900" }}>-</button>
+                        <span style={{ fontSize: "14px", fontWeight: "900" }}>{item.qty}</span>
+                        <button onClick={() => changeQty(item.uid, 1)}
+                          className="h-7 w-7 rounded-full bg-[#d6292d] text-white shadow-sm"
+                          style={{ fontSize: "16px", fontWeight: "900" }}>+</button>
+                      </div>
+                      <p style={{ color: BRAND_RED, fontSize: "15px", fontWeight: "900" }}>
+                        {getItemTotal(item).toLocaleString()}원
+                      </p>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            <aside className="rounded-[1.75rem] bg-white p-5 shadow-sm">
-              <p className="text-slate-900" style={{ fontSize: "26px", fontWeight: "900" }}>
-                결제 예정 금액
-              </p>
-              <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(160deg,#fff3d7_0%,#fff9ef_100%)] p-5">
-                <div className="flex items-center justify-between text-slate-600">
-                  <span style={{ fontSize: "18px", fontWeight: "700" }}>총 수량</span>
-                  <span style={{ fontSize: "18px", fontWeight: "800" }}>{totalCount}개</span>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-slate-900">
-                  <span style={{ fontSize: "21px", fontWeight: "800" }}>총 결제 금액</span>
-                  <span style={{ color: BRAND_RED, fontSize: "30px", fontWeight: "900" }}>
-                    {totalPrice.toLocaleString()}원
-                  </span>
                 </div>
               </div>
+            ))
+          )}
+        </div>
 
-              <div className="mt-5 space-y-3">
-                <button
-                  onClick={() => setStep("payment")}
-                  disabled={cart.length === 0}
-                  className="w-full rounded-2xl bg-[#d6292d] py-5 text-white disabled:bg-slate-300"
-                  style={{ fontSize: "22px", fontWeight: "900" }}
-                >
-                  결제하기
-                </button>
-                <button
-                  onClick={() => setStep("menu")}
-                  className="w-full rounded-2xl bg-[#f8f4ef] py-5 text-slate-700"
-                  style={{ fontSize: "19px", fontWeight: "800" }}
-                >
-                  메뉴 더 담기
-                </button>
-              </div>
-            </aside>
+        <div className="bg-white border-t border-slate-100 px-3 py-3 flex-shrink-0 space-y-2">
+          <div className="flex justify-between items-center px-1">
+            <span className="text-slate-600" style={{ fontSize: "13px" }}>총 {totalCount}개</span>
+            <span style={{ color: BRAND_RED, fontSize: "18px", fontWeight: "900" }}>{totalPrice.toLocaleString()}원</span>
           </div>
+          <button onClick={() => setStep("payment")} disabled={cart.length === 0}
+            className="w-full rounded-xl bg-[#d6292d] py-3 text-white disabled:bg-slate-300"
+            style={{ fontSize: "15px", fontWeight: "900" }}>결제하기</button>
+          <button onClick={() => setStep("menu")}
+            className="w-full rounded-xl bg-[#f8f4ef] py-2.5 text-slate-700"
+            style={{ fontSize: "13px", fontWeight: "800" }}>메뉴 더 담기</button>
         </div>
       </div>
     );
@@ -1116,45 +916,35 @@ export default function LotteriaPage() {
 
   if (step === "payment") {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
-        <Header
-          title="결제 수단 선택"
-          subtitle="카드 결제 흐름을 실제처럼 연습할 수 있어요"
-          onBack={() => setStep("cart")}
-        />
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
+        <Header title="결제 수단 선택" subtitle="카드 결제 흐름을 연습할 수 있어요" onBack={() => setStep("cart")} />
 
-        <div className="mx-auto max-w-4xl px-4 py-5 lg:px-6">
-          <div className="rounded-[1.8rem] bg-white p-6 shadow-sm">
-            <div className="rounded-[1.5rem] bg-[linear-gradient(160deg,#fff3d7_0%,#fff9ef_100%)] p-5">
-              <p className="text-slate-600" style={{ fontSize: "18px", fontWeight: "700" }}>총 결제 금액</p>
-              <p className="mt-2" style={{ color: BRAND_RED, fontSize: "36px", fontWeight: "900" }}>
-                {totalPrice.toLocaleString()}원
+        <div className="flex-1 px-3 py-3 space-y-3">
+          <div className="rounded-2xl bg-[linear-gradient(160deg,#fff3d7_0%,#fff9ef_100%)] p-4">
+            <p className="text-slate-500" style={{ fontSize: "13px", fontWeight: "700" }}>총 결제 금액</p>
+            <p className="mt-1" style={{ color: BRAND_RED, fontSize: "24px", fontWeight: "900" }}>
+              {totalPrice.toLocaleString()}원
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => setStep("card-pin")}
+              className="rounded-2xl bg-[linear-gradient(135deg,#154a96_0%,#2a7bd6_100%)] p-4 text-left text-white shadow-lg active:scale-95 transition-all">
+              <CreditCard size={28} />
+              <p className="mt-3" style={{ fontSize: "16px", fontWeight: "900" }}>카드 결제</p>
+              <p className="mt-1 text-white/75" style={{ fontSize: "11px", lineHeight: 1.5 }}>
+                카드 삽입 후 비밀번호 입력 연습
               </p>
-            </div>
+            </button>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <button
-                onClick={() => setStep("card-pin")}
-                className="rounded-[1.75rem] bg-[linear-gradient(135deg,#154a96_0%,#2a7bd6_100%)] p-8 text-left text-white shadow-lg"
-              >
-                <CreditCard size={48} />
-                <p className="mt-5" style={{ fontSize: "30px", fontWeight: "900" }}>카드 결제</p>
-                <p className="mt-2 text-white/80" style={{ fontSize: "16px", lineHeight: 1.6 }}>
-                  카드 삽입 후 비밀번호를 입력하는 순서를 연습합니다.
-                </p>
-              </button>
-
-              <button
-                onClick={() => setStep("complete")}
-                className="rounded-[1.75rem] bg-[linear-gradient(135deg,#ebefe8_0%,#ffffff_100%)] p-8 text-left text-slate-900 shadow-lg ring-1 ring-black/5"
-              >
-                <UtensilsCrossed size={48} className="text-[#cf5f12]" />
-                <p className="mt-5" style={{ fontSize: "30px", fontWeight: "900" }}>현장 결제</p>
-                <p className="mt-2 text-slate-600" style={{ fontSize: "16px", lineHeight: 1.6 }}>
-                  직원에게 직접 결제하는 상황을 가정하고 주문 완료 화면으로 이동합니다.
-                </p>
-              </button>
-            </div>
+            <button onClick={() => setStep("complete")}
+              className="rounded-2xl bg-white p-4 text-left text-slate-900 shadow-lg ring-1 ring-black/5 active:scale-95 transition-all">
+              <UtensilsCrossed size={28} className="text-[#cf5f12]" />
+              <p className="mt-3" style={{ fontSize: "16px", fontWeight: "900" }}>현장 결제</p>
+              <p className="mt-1 text-slate-500" style={{ fontSize: "11px", lineHeight: 1.5 }}>
+                직원에게 직접 결제 후 완료로 이동
+              </p>
+            </button>
           </div>
         </div>
       </div>
@@ -1163,52 +953,37 @@ export default function LotteriaPage() {
 
   if (step === "card-pin") {
     return (
-      <div className="min-h-screen bg-[#f8f4ef]">
-        <Header
-          title="카드 비밀번호 입력"
-          subtitle="연습용이므로 어떤 숫자를 입력해도 다음으로 진행됩니다"
-          onBack={() => setStep("payment")}
-        />
+      <div className="min-h-full flex flex-col bg-[#f8f4ef]">
+        <Header title="카드 비밀번호 입력" subtitle="아무 숫자나 입력해도 진행됩니다" onBack={() => setStep("payment")} />
 
-        <div className="mx-auto max-w-3xl px-4 py-5 lg:px-6">
-          <div className="rounded-[1.9rem] bg-white p-6 shadow-sm">
-            <div className="rounded-[1.5rem] bg-[#f4f8ff] p-6 text-center">
-              <CreditCard className="mx-auto text-[#2265c7]" size={56} />
-              <p className="mt-4 text-slate-900" style={{ fontSize: "28px", fontWeight: "900" }}>
-                카드를 단말기에 넣은 뒤 비밀번호를 입력해 주세요
-              </p>
-              <p className="mt-3 text-slate-600" style={{ fontSize: "17px", lineHeight: 1.6 }}>
-                실제 키오스크와 비슷하게 카드 결제 흐름을 연습하기 위한 단계입니다.
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-[1.5rem] border border-dashed border-[#b9cdee] p-6">
-              <label className="block text-slate-700" style={{ fontSize: "20px", fontWeight: "800" }}>
-                비밀번호 4자리
-              </label>
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={4}
-                value={cardPin}
-                onChange={(e) => setCardPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                className="mt-4 w-full rounded-2xl border-2 border-[#c4d7f3] px-5 py-5 text-center tracking-[0.45em]"
-                style={{ fontSize: "30px", fontWeight: "900" }}
-                placeholder="0000"
-              />
-              <p className="mt-3 text-slate-500" style={{ fontSize: "15px" }}>
-                입력값 검사는 하지 않으며, 아무 숫자나 넣어도 주문이 완료됩니다.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setStep("complete")}
-              className="mt-6 w-full rounded-2xl bg-[#d6292d] py-5 text-white"
-              style={{ fontSize: "22px", fontWeight: "900" }}
-            >
-              결제 승인 완료
-            </button>
+        <div className="flex-1 px-3 py-3 space-y-3">
+          <div className="rounded-2xl bg-[#f4f8ff] p-4 text-center">
+            <CreditCard className="mx-auto text-[#2265c7]" size={36} />
+            <p className="mt-3 text-slate-900" style={{ fontSize: "15px", fontWeight: "900", lineHeight: 1.4 }}>
+              카드를 단말기에 넣은 뒤 비밀번호를 입력해 주세요
+            </p>
           </div>
+
+          <div className="rounded-2xl border border-dashed border-[#b9cdee] bg-white p-4">
+            <label className="block text-slate-700" style={{ fontSize: "14px", fontWeight: "800" }}>비밀번호 4자리</label>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={cardPin}
+              onChange={(e) => setCardPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="mt-3 w-full rounded-xl border-2 border-[#c4d7f3] px-4 py-3 text-center tracking-[0.4em]"
+              style={{ fontSize: "22px", fontWeight: "900" }}
+              placeholder="0000"
+            />
+            <p className="mt-2 text-slate-400" style={{ fontSize: "12px" }}>아무 숫자나 넣어도 주문이 완료됩니다.</p>
+          </div>
+
+          <button onClick={() => setStep("complete")}
+            className="w-full rounded-xl bg-[#d6292d] py-3 text-white"
+            style={{ fontSize: "15px", fontWeight: "900" }}>
+            결제 승인 완료
+          </button>
         </div>
       </div>
     );
@@ -1216,67 +991,47 @@ export default function LotteriaPage() {
 
   if (step === "complete") {
     return (
-      <div className="min-h-screen bg-[radial-gradient(circle_at_top,#ffe7d8_0%,#ffeede_36%,#fff7ef_100%)]">
-        <div className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
-          <div className="rounded-[2rem] bg-white shadow-[0_20px_55px_rgba(122,47,14,0.18)]">
-            <div className="bg-[linear-gradient(135deg,#be1d22_0%,#d6292d_58%,#ef7630_100%)] px-8 py-8 text-white">
-              <PracticeLogo />
-            </div>
+      <div className="min-h-full flex flex-col bg-[radial-gradient(circle_at_top,#ffe7d8_0%,#ffeede_36%,#fff7ef_100%)]">
+        <div className="bg-[linear-gradient(135deg,#be1d22_0%,#d6292d_58%,#ef7630_100%)] px-3 py-3 text-white flex-shrink-0">
+          <PracticeLogo />
+        </div>
 
-            <div className="p-8 text-center">
-              <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-[#fff0d9] shadow-inner">
-                <Check size={64} className="text-[#d6292d]" strokeWidth={3} />
+        <div className="flex-1 px-3 py-4 flex flex-col items-center text-center space-y-4">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#fff0d9] shadow-inner">
+            <Check size={44} className="text-[#d6292d]" strokeWidth={3} />
+          </div>
+
+          <div>
+            <p className="text-slate-900" style={{ fontSize: "22px", fontWeight: "900" }}>주문이 완료되었습니다</p>
+            <p className="mt-2 text-slate-500" style={{ fontSize: "13px", lineHeight: 1.5 }}>
+              {orderType === "dine-in" ? "주문 번호가 호출되면 카운터에서 받아가세요." : "포장 준비가 끝나면 주문 번호로 안내됩니다."}
+            </p>
+          </div>
+
+          <div className="w-full rounded-2xl bg-[#fff8ef] p-5">
+            <p className="text-slate-500" style={{ fontSize: "13px", fontWeight: "800" }}>주문 번호</p>
+            <p className="mt-1" style={{ color: BRAND_RED, fontSize: "56px", fontWeight: "900", lineHeight: 1 }}>
+              {orderNumber}
+            </p>
+            <p className="mt-2 text-slate-500" style={{ fontSize: "13px" }}>
+              총 {totalCount}개 메뉴 · {totalPrice.toLocaleString()}원
+            </p>
+          </div>
+
+          <div className="w-full rounded-2xl border border-dashed border-[#f0c88e] bg-white p-3 text-left space-y-1">
+            {cart.map((item) => (
+              <div key={item.uid} className="flex justify-between text-slate-700">
+                <span style={{ fontSize: "13px" }}>{item.menu.name} x{item.qty}</span>
+                <span style={{ fontSize: "13px", fontWeight: "800" }}>{getItemTotal(item).toLocaleString()}원</span>
               </div>
+            ))}
+          </div>
 
-              <p className="mt-6 text-slate-900" style={{ fontSize: "36px", fontWeight: "900" }}>
-                주문이 완료되었습니다
-              </p>
-              <p className="mt-3 text-slate-600" style={{ fontSize: "19px", lineHeight: 1.6 }}>
-                {orderType === "dine-in"
-                  ? "주문 번호가 호출되면 카운터에서 받아가세요."
-                  : "포장 준비가 끝나면 주문 번호로 안내됩니다."}
-              </p>
-
-              <div className="mx-auto mt-8 max-w-md rounded-[1.8rem] bg-[#fff8ef] p-7">
-                <p className="text-slate-500" style={{ fontSize: "18px", fontWeight: "800" }}>주문 번호</p>
-                <p className="mt-2" style={{ color: BRAND_RED, fontSize: "78px", fontWeight: "900", lineHeight: 1 }}>
-                  {orderNumber}
-                </p>
-                <p className="mt-4 text-slate-600" style={{ fontSize: "16px" }}>
-                  총 {totalCount}개 메뉴 · {totalPrice.toLocaleString()}원
-                </p>
-              </div>
-
-              <div className="mx-auto mt-8 max-w-md rounded-[1.5rem] border border-dashed border-[#f0c88e] p-5 text-left">
-                {cart.map((item) => (
-                  <div key={item.uid} className="flex justify-between py-2 text-slate-700">
-                    <span style={{ fontSize: "16px" }}>
-                      {item.menu.name} x {item.qty}
-                    </span>
-                    <span style={{ fontSize: "16px", fontWeight: "800" }}>
-                      {getItemTotal(item).toLocaleString()}원
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mx-auto mt-8 grid max-w-md gap-3">
-                <button
-                  onClick={resetAll}
-                  className="rounded-2xl bg-[#d6292d] py-5 text-white"
-                  style={{ fontSize: "22px", fontWeight: "900" }}
-                >
-                  다시 주문하기
-                </button>
-                <button
-                  onClick={() => navigate("/")}
-                  className="rounded-2xl bg-[#f8f4ef] py-5 text-slate-700"
-                  style={{ fontSize: "20px", fontWeight: "800" }}
-                >
-                  홈으로
-                </button>
-              </div>
-            </div>
+          <div className="w-full space-y-2">
+            <button onClick={resetAll} className="w-full rounded-xl bg-[#d6292d] py-3 text-white"
+              style={{ fontSize: "15px", fontWeight: "900" }}>다시 주문하기</button>
+            <button onClick={() => navigate("/")} className="w-full rounded-xl bg-[#f8f4ef] py-3 text-slate-700"
+              style={{ fontSize: "14px", fontWeight: "800" }}>홈으로</button>
           </div>
         </div>
       </div>
