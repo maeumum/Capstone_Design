@@ -223,10 +223,9 @@
 
 /* ----- CTA area ----- */
 .splash-cta-area {
-  margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  padding-top: 14px;
 }
 
 .splash-cta-start {
@@ -269,6 +268,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  margin-top: auto;
   padding-top: 2px;
 }
 .splash-sponsor-label {
@@ -278,7 +278,7 @@
   color: var(--ink-mute);
 }
 .splash-sponsor-logo {
-  height: 36px;
+  height: 400px;
   width: auto;
   max-width: 100%;
   opacity: .9;

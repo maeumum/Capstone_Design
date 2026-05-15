@@ -73,6 +73,15 @@ export default function SplashScreen({ onStart }: SplashScreenProps) {
           </div>
         </div>
 
+        <footer className="splash-footer">
+          <span className="splash-sponsor-label">주관</span>
+          <img
+            className="splash-sponsor-logo"
+            src="/jb-logo.png"
+            alt="전북특별자치도 평생교육장학진흥원"
+          />
+        </footer>
+
         <div className="splash-cta-area">
           <button type="button" className="splash-cta-start" onClick={onStart}>
             시작하기
@@ -82,15 +91,6 @@ export default function SplashScreen({ onStart }: SplashScreenProps) {
               </svg>
             </span>
           </button>
-
-          <footer className="splash-footer">
-            <span className="splash-sponsor-label">주관</span>
-            <img
-              className="splash-sponsor-logo"
-              src="/jb-logo.png"
-              alt="전북특별자치도 평생교육장학진흥원"
-            />
-          </footer>
         </div>
 
       </div>
