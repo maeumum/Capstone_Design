@@ -77,7 +77,7 @@ export default function SplashScreen({ onStart }: SplashScreenProps) {
           <span className="splash-sponsor-label">주관</span>
           <img
             className="splash-sponsor-logo"
-            src="/jb-logo.png"
+            src="/jb-logo-cropped.png"
             alt="전북특별자치도 평생교육장학진흥원"
           />
         </footer>
