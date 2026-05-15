@@ -4,7 +4,7 @@ import "./BankMain.css";
 
 type Service = "withdrawal" | "balance" | "transfer" | "deposit" | "passbook" | "utility" | null;
 type Step =
-  | "main" | "warning" | "pin"
+  | "main" | "warning" | "insert" | "pin"
   | "withdrawal-amount" | "transfer-bank" | "transfer-account" | "transfer-amount"
   | "deposit-insert" | "passbook-insert"
   | "confirm" | "complete" | "balance-result";
@@ -249,7 +249,120 @@ export default function BankPage() {
           </section>
           <div className="action-row">
             <button type="button" className="action-btn cancel" onClick={() => setStep("main")}>취소</button>
-            <button type="button" className="action-btn confirm" onClick={() => setStep("pin")}>확인</button>
+            <button type="button" className="action-btn confirm" onClick={() => setStep("insert")}>확인</button>
+          </div>
+        </div>
+      </AtmPage>
+    );
+  }
+
+  // ── INSERT (카드 / 통장 삽입) ─────────────────────────────────────────────────
+  if (step === "insert") {
+    return (
+      <AtmPage>
+        <div className="atm-body insert">
+          <section className="insert-panel">
+            <div className="insert-titlebar">
+              <h1>카드 / 통장</h1>
+            </div>
+            <p className="insert-prompt">
+              <span className="accent">카드</span>나{" "}
+              <span className="accent">통장</span>을 넣어 주십시오
+            </p>
+            <div className="illus-row">
+              {/* 통장 */}
+              <div className="illus-side passbook">
+                <div className="slot-bar">
+                  <span className="label">
+                    <span className="ko">통장</span>
+                    <span className="en">Passbook</span>
+                    <span className="ic" aria-hidden="true"></span>
+                  </span>
+                </div>
+                <div className="book" aria-label="passbook being inserted">
+                  <div className="col">
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                  </div>
+                  <div className="col">
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                  </div>
+                </div>
+              </div>
+              {/* 왼쪽 커넥터 */}
+              <div className="connector left">
+                <svg viewBox="0 0 110 22" preserveAspectRatio="none">
+                  <polyline
+                    points="0,11 90,11 90,4 108,11 90,18 90,11"
+                    fill="rgba(140,160,185,.45)"
+                    stroke="rgba(110,135,165,.6)"
+                    strokeWidth="1"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              {/* ATM 일러스트 */}
+              <div className="atm-illus">
+                <div className="body">
+                  <div className="screen-top">
+                    <div className="brand-tag"></div>
+                  </div>
+                  <div className="screen-bot"></div>
+                  <div className="keypad">
+                    {Array.from({ length: 9 }).map((_, i) => <span key={i}></span>)}
+                  </div>
+                  <div className="slot-detail" aria-hidden="true">
+                    <svg viewBox="0 0 56 40" preserveAspectRatio="none">
+                      <path
+                        d="M6 22 L22 22 L30 14 L50 14"
+                        fill="none"
+                        stroke="#1a1d24"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ring left" aria-hidden="true"></div>
+                  <div className="ring right" aria-hidden="true"></div>
+                </div>
+              </div>
+              {/* 오른쪽 커넥터 */}
+              <div className="connector right">
+                <svg viewBox="0 0 110 22" preserveAspectRatio="none">
+                  <polyline
+                    points="0,11 90,11 90,4 108,11 90,18 90,11"
+                    fill="rgba(140,160,185,.45)"
+                    stroke="rgba(110,135,165,.6)"
+                    strokeWidth="1"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              {/* 카드 슬롯 */}
+              <div className="illus-side cardslot">
+                <div className="slot-bar" aria-hidden="true"></div>
+                <div className="card-back" aria-hidden="true"></div>
+                <div className="card-front">
+                  <span className="ko">카드</span>
+                  <span className="en">Card</span>
+                  <span className="ko"></span>
+                  <span className="en"></span>
+                  <span className="ic" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+          <div className="action-row">
+            <button type="button" className="action-btn cancel" onClick={() => setStep("main")}>취소</button>
+            <button type="button" className="action-btn confirm" onClick={() => setStep("pin")}>삽입 완료</button>
           </div>
         </div>
       </AtmPage>
