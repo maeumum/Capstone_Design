@@ -1,2 +1,1 @@
-# MyFirstProject
-Basic Project 실습 과제 1
+# 2026-1 산학실전캡스톤
