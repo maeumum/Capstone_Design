@@ -278,8 +278,9 @@
   color: var(--ink-mute);
 }
 .splash-sponsor-logo {
-  height: 22px;
+  height: 36px;
   width: auto;
-  max-width: 90%;
+  max-width: 100%;
   opacity: .9;
+  object-fit: contain;
 }
