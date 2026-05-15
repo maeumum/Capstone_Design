@@ -8,6 +8,7 @@ import BusPage from "./components/BusPage";
 import LotteriaPage from "./components/LotteriaPage";
 import TableOrderPage from "./components/TableOrderPage";
 import EmptyPage from "./components/EmptyPage";
+import HospitalPage from "./components/HospitalPage";
 
 export const router = createBrowserRouter([
   {
@@ -44,7 +45,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/hospital",
-    Component: EmptyPage,
+    Component: HospitalPage,
   },
   {
     path: "/empty",
