@@ -43,6 +43,10 @@ export const router = createBrowserRouter([
     Component: TableOrderPage,
   },
   {
+    path: "/hospital",
+    Component: EmptyPage,
+  },
+  {
     path: "/empty",
     Component: EmptyPage,
   },
