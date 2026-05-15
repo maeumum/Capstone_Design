@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router";
+import PhoneFrame from "./components/PhoneFrame";
 import Home from "./components/Home";
 import CafePage from "./components/CafePage";
 import BankPage from "./components/BankPage";
@@ -12,43 +13,21 @@ import HospitalPage from "./components/HospitalPage";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    Component: Home,
-  },
-  {
-    path: "/cafe",
-    Component: CafePage,
+    Component: PhoneFrame,
+    children: [
+      { path: "/", Component: Home },
+      { path: "/cafe", Component: CafePage },
+      { path: "/public", Component: PublicPage },
+      { path: "/ktx", Component: KTXPage },
+      { path: "/bus", Component: BusPage },
+      { path: "/lotteria", Component: LotteriaPage },
+      { path: "/table-order", Component: TableOrderPage },
+      { path: "/hospital", Component: HospitalPage },
+      { path: "/empty", Component: EmptyPage },
+    ],
   },
   {
     path: "/bank",
     Component: BankPage,
-  },
-  {
-    path: "/public",
-    Component: PublicPage,
-  },
-  {
-    path: "/ktx",
-    Component: KTXPage,
-  },
-  {
-    path: "/bus",
-    Component: BusPage,
-  },
-  {
-    path: "/lotteria",
-    Component: LotteriaPage,
-  },
-  {
-    path: "/table-order",
-    Component: TableOrderPage,
-  },
-  {
-    path: "/hospital",
-    Component: HospitalPage,
-  },
-  {
-    path: "/empty",
-    Component: EmptyPage,
   },
 ]);

@@ -102,7 +102,7 @@ export default function CafePage() {
   const nextDisabled = optionsPhase === 'payment' && !selectedPayment;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100svh', background: Y, overflow: 'hidden', fontFamily: '"Apple SD Gothic Neo", "Malgun Gothic", sans-serif', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: Y, overflow: 'hidden', fontFamily: '"Apple SD Gothic Neo", "Malgun Gothic", sans-serif', position: 'relative' }}>
 
       {/* ── Header ── */}
       <header style={{ background: Y, display: 'flex', alignItems: 'center', padding: '10px 14px 4px', flexShrink: 0 }}>

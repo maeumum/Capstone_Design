@@ -1,0 +1,36 @@
+/* ========================================================
+   Phone frame wrapper — 390×844, same as SplashScreen
+   ======================================================== */
+
+.phone-root {
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #1f1f24;
+}
+
+.phone-frame {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  flex-shrink: 0;
+  /* Makes position:fixed children position relative to this frame */
+  transform: translateZ(0);
+}
+
+/* Scale down the frame on small screens */
+@media (max-height: 880px) {
+  .phone-frame {
+    transform: scale(calc((100vh - 40px) / 844));
+    transform-origin: top center;
+  }
+}
+
+/* Make each page fill the frame height (overrides min-h-svh / min-h-screen) */
+.phone-frame > * {
+  min-height: 100%;
+}
