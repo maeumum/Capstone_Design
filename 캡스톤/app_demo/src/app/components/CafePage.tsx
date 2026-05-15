@@ -91,7 +91,7 @@ export default function CafePage() {
   // Step 0: 매장/포장 선택
   if (step === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <button
             onClick={() => navigate("/")}
@@ -151,7 +151,7 @@ export default function CafePage() {
     ];
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-6 gap-2">
             <button
@@ -213,7 +213,7 @@ export default function CafePage() {
     const filteredMenus = menuItems.filter((item) => item.category === selectedCategory);
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-6 gap-2">
             <button
@@ -278,7 +278,7 @@ export default function CafePage() {
   // Step 3: 옵션 선택
   if (step === 3 && selectedMenu) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-6 gap-2">
             <button
@@ -382,7 +382,7 @@ export default function CafePage() {
   // Step 4: 장바구니 확인
   if (step === 4) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-6 gap-2">
             <button
@@ -480,7 +480,7 @@ export default function CafePage() {
   // Step 5: 결제 수단 선택
   if (step === 5) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100 p-4">
+      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
         <div className="max-w-md mx-auto">
           <div className="flex justify-between items-center mb-6 gap-2">
             <button
@@ -547,7 +547,7 @@ export default function CafePage() {
   // Step 6: 완료 화면
   if (step === 6) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 p-4 flex items-center justify-center">
+      <div className="min-h-svh bg-gradient-to-b from-green-50 to-green-100 p-4 flex items-center justify-center">
         <div className="max-w-md mx-auto w-full">
           <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
             <div className="bg-green-100 rounded-full w-32 h-32 mx-auto mb-6 flex items-center justify-center">

@@ -146,7 +146,7 @@ export default function LotteriaPage() {
   // ── WELCOME ──────────────────────────────────────────────
   if (step === "welcome") {
     return (
-      <div className="min-h-screen bg-red-600 flex flex-col">
+      <div className="min-h-svh bg-red-600 flex flex-col">
         <div className="bg-red-700 px-4 py-4 flex items-center">
           <button onClick={() => navigate("/")} className="text-white">
             <ArrowLeft size={30} />
@@ -203,7 +203,7 @@ export default function LotteriaPage() {
     const filtered = menuItems.filter((m) => m.category === activeCategory);
 
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader
           onBack={() => setStep("welcome")}
           title={`LOTTERIA · ${orderType === "dine-in" ? "🏠 매장" : "🛍️ 포장"}`}
@@ -322,7 +322,7 @@ export default function LotteriaPage() {
     ];
 
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader onBack={() => { setStep("menu"); setSelectedItem(null); }} />
 
         <div className="flex-1 flex flex-col p-5 gap-5">
@@ -388,7 +388,7 @@ export default function LotteriaPage() {
   if (step === "set-drink" && selectedItem) {
     const size = selectedSetType === "set-m" ? "(M)" : "(L)";
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader onBack={() => setStep("item-option")} />
 
         <div className="flex-1 flex flex-col p-5 gap-5">
@@ -437,7 +437,7 @@ export default function LotteriaPage() {
   if (step === "set-side" && selectedItem) {
     const size = selectedSetType === "set-m" ? "(M)" : "(L)";
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader onBack={() => setStep("set-drink")} />
 
         <div className="flex-1 flex flex-col p-5 gap-5">
@@ -486,7 +486,7 @@ export default function LotteriaPage() {
   // ── CART ─────────────────────────────────────────────────
   if (step === "cart") {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader onBack={() => setStep("menu")} title="주문 내역" />
 
         <div className="flex-1 overflow-y-auto p-4 pb-44 space-y-4">
@@ -565,7 +565,7 @@ export default function LotteriaPage() {
   // ── PAYMENT ───────────────────────────────────────────────
   if (step === "payment") {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="min-h-svh flex flex-col bg-gray-100">
         <LotteriaHeader onBack={() => setStep("cart")} title="결제 수단 선택" />
 
         <div className="flex-1 flex flex-col p-6 gap-6">
@@ -604,7 +604,7 @@ export default function LotteriaPage() {
   // ── COMPLETE ──────────────────────────────────────────────
   if (step === "complete") {
     return (
-      <div className="min-h-screen bg-red-600 flex flex-col">
+      <div className="min-h-svh bg-red-600 flex flex-col">
         <div className="bg-red-700 px-4 py-4 text-center">
           <span className="text-white font-black" style={{ fontSize: "28px", letterSpacing: "0.12em" }}>
             LOTTERIA

@@ -20,7 +20,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col">
+    <div className="min-h-svh bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col">
       <div className="py-8 px-6">
         <h1 className="text-center text-gray-800" style={{ fontSize: '48px', fontWeight: '700' }}>
           키오스크 연습

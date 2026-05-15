@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import "./BankMain.css";
 
 type Service = "withdrawal" | "balance" | "transfer" | "deposit" | "passbook" | "utility" | null;
 type Step =
-  | "welcome"
+  | "main"
   | "pin"
-  | "service"
   | "withdrawal-amount"
   | "transfer-bank"
   | "transfer-account"
@@ -20,7 +20,6 @@ const BANKS = [
   "전북은행", "국민은행", "신한은행", "우리은행",
   "하나은행", "농협은행", "기업은행", "카카오뱅크", "토스뱅크",
 ];
-
 const QUICK_AMOUNTS = [50000, 100000, 200000, 300000, 500000, 700000];
 const MOCK_BALANCE = 1245300;
 
@@ -63,7 +62,7 @@ function Numpad({ onInput }: { onInput: (d: string) => void }) {
   );
 }
 
-function CancelBar({ onCancel, onBack, backStep }: { onCancel: () => void; onBack?: () => void; backStep?: string }) {
+function CancelBar({ onCancel, onBack }: { onCancel: () => void; onBack?: () => void }) {
   return (
     <div className="bg-gray-700 px-6 py-4 flex justify-between items-center">
       {onBack ? (
@@ -80,22 +79,27 @@ function CancelBar({ onCancel, onBack, backStep }: { onCancel: () => void; onBac
 
 export default function BankPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("welcome");
-  const [pin, setPin] = useState("");
+  const [step, setStep] = useState<Step>("main");
   const [service, setService] = useState<Service>(null);
+  const [pin, setPin] = useState("");
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
   const [transferBank, setTransferBank] = useState("");
   const [transferAccount, setTransferAccount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
 
   const reset = () => {
-    setStep("welcome");
-    setPin("");
+    setStep("main");
     setService(null);
+    setPin("");
     setWithdrawalAmount(0);
     setTransferBank("");
     setTransferAccount("");
     setTransferAmount("");
+  };
+
+  const selectService = (svc: Service) => {
+    setService(svc);
+    setStep("pin");
   };
 
   const handlePin = (d: string) => {
@@ -104,7 +108,16 @@ export default function BankPage() {
     if (pin.length >= 4) return;
     const next = pin + d;
     setPin(next);
-    if (next.length === 4) setTimeout(() => setStep("service"), 400);
+    if (next.length === 4) {
+      setTimeout(() => {
+        if (service === "withdrawal") setStep("withdrawal-amount");
+        else if (service === "balance") setStep("balance-result");
+        else if (service === "transfer") setStep("transfer-bank");
+        else if (service === "deposit") setStep("deposit-insert");
+        else if (service === "passbook") setStep("passbook-insert");
+        else if (service === "utility") setStep("confirm");
+      }, 400);
+    }
   };
 
   const handleAccount = (d: string) => {
@@ -119,37 +132,94 @@ export default function BankPage() {
     if (transferAmount.length < 8) setTransferAmount((p) => p + d);
   };
 
-  // ── WELCOME ──────────────────────────────────────────────
-  if (step === "welcome") {
+  // ── MAIN ─────────────────────────────────────────────────
+  if (step === "main") {
+    const notReady = () => alert("해당 업무는 준비 중입니다");
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-green-800 mb-1" style={{ fontSize: "20px" }}>안녕하세요</p>
-            <p className="text-green-900" style={{ fontSize: "38px", fontWeight: "700" }}>전북은행 ATM입니다</p>
-          </div>
+      <div
+        style={{
+          height: "100svh",
+          overflow: "hidden",
+          position: "relative",
+          // ATM와 동일한 그라디언트 배경 → 위아래 여백도 자연스럽게 이어짐
+          background: "linear-gradient(to bottom, #cfe6f5 0%, #e8f3fa 22%, #ffffff 55%, #ffffff 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          // ATM 시각 높이 = 800 × (vw/1340) ≈ 59.7vw
+          // 위아래 여백 = (100svh - 59.7vw) / 2 → 세로 중앙 정렬
+          paddingTop: "calc((100svh - 59.7vw) / 2)",
+        }}
+      >
+        <div className="atm-screen" data-screen-label="01 ATM Main">
 
-          <div className="bg-green-50 border-4 border-green-200 rounded-3xl p-10 w-full max-w-sm text-center">
-            <div className="text-8xl mb-6">💳</div>
-            <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.6" }}>
-              카드를 넣어주세요
-            </p>
-            <p className="text-gray-500 mt-2" style={{ fontSize: "18px" }}>위쪽 카드 투입구에 넣으세요</p>
-          </div>
+          <header className="atm-header">
+            <div className="slogan-slot">slogan placeholder</div>
+            <div className="logo-slot">bank logo placeholder</div>
+          </header>
 
-          <button
-            onClick={() => setStep("pin")}
-            className="w-full max-w-sm bg-green-700 hover:bg-green-800 text-white rounded-2xl py-8 shadow-xl active:scale-95 transition-all"
-          >
-            <span style={{ fontSize: "28px", fontWeight: "700" }}>카드 넣기 (시작하기)</span>
-          </button>
+          <div className="atm-body">
+
+            <div className="side-col left-col">
+              <div className="btn orange smaller-text two-line" onClick={notReady}>QR코드 거래/휴대폰거래/<br />스마트출금</div>
+              <div className="btn" onClick={() => selectService("withdrawal")}>예금(수표)출금</div>
+              <div className="btn" onClick={() => selectService("balance")}>잔액조회</div>
+              <div className="btn small-text two-line" onClick={() => selectService("transfer")}>송금(계좌이체)<br />/펀드입금예약</div>
+              <div className="btn" onClick={notReady}>신용카드</div>
+              <div className="btn small-text two-line" onClick={notReady}>예금거래<br />기록조회</div>
+              <div className="btn" onClick={notReady}>대출업무</div>
+            </div>
+
+            <div className="center-col">
+              <div className="poster-frame" aria-label="poster area" />
+              <div className="info-block">
+                <div className="info-row"><span className="k">기번</span><span className="s">:</span><span className="v">052917</span></div>
+                <div className="info-row"><span className="k">운영시간</span><span className="s">:</span><span className="v" /></div>
+                <div className="info-notes">
+                  <div>5만/1만 지급가능</div>
+                  <div>5만/1만 입금가능</div>
+                </div>
+              </div>
+              <button className="btn-zoom" type="button">
+                <span className="zoom-icon">+</span>
+                <span className="label-stack">
+                  <span>화면확대</span>
+                  <span className="label-sub">(저시력고객용)</span>
+                </span>
+              </button>
+            </div>
+
+            <div className="side-col right-col">
+              <div className="btn" onClick={() => selectService("deposit")}>입금</div>
+              <div className="btn" onClick={() => selectService("passbook")}>통장정리</div>
+              <div className="btn small-text two-line" onClick={notReady}>자동계좌<br />이체설정</div>
+              <div className="btn smaller-text two-line" onClick={() => selectService("utility")}>지로/공과금/세금/<br />지방세/범칙금</div>
+              <div className="btn small-text two-line" onClick={notReady}>자주쓰는<br />입금계좌관리</div>
+              <div className="btn" onClick={notReady}>무카드/무통장</div>
+              <div className="btn green two-line" onClick={notReady}>ENGLISH<br />日本語/漢語</div>
+            </div>
+
+          </div>
         </div>
-        <div className="bg-gray-700 px-6 py-4">
-          <button onClick={() => navigate("/")} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-xl active:scale-95 transition-all">
-            <span style={{ fontSize: "20px", fontWeight: "600" }}>← 홈으로</span>
-          </button>
-        </div>
+
+        {/* 홈 버튼 — 하단 여백 영역에 절대 위치 */}
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            position: "absolute",
+            bottom: "16px",
+            background: "rgba(40,60,100,0.12)",
+            color: "#2a3a55",
+            border: "1px solid rgba(40,60,100,0.25)",
+            borderRadius: "8px",
+            padding: "7px 24px",
+            fontSize: "13px",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          ← 홈으로
+        </button>
       </div>
     );
   }
@@ -182,59 +252,12 @@ export default function BankPage() {
 
           {pin.length === 4 && (
             <button
-              onClick={() => setStep("service")}
+              onClick={() => handlePin("")}
               className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
             >
               <span style={{ fontSize: "26px", fontWeight: "700" }}>확인</span>
             </button>
           )}
-        </div>
-        <CancelBar onCancel={reset} />
-      </div>
-    );
-  }
-
-  // ── SERVICE SELECTION ─────────────────────────────────────
-  if (step === "service") {
-    const services = [
-      { id: "withdrawal", label: "출금", desc: "현금 찾기", emoji: "💵", color: "bg-blue-600" },
-      { id: "balance", label: "잔액조회", desc: "잔액 확인", emoji: "📊", color: "bg-green-700" },
-      { id: "transfer", label: "이체", desc: "계좌 이체", emoji: "🔄", color: "bg-purple-600" },
-      { id: "deposit", label: "입금", desc: "현금 넣기", emoji: "💰", color: "bg-orange-500" },
-      { id: "passbook", label: "통장정리", desc: "통장 업데이트", emoji: "📔", color: "bg-teal-600" },
-      { id: "utility", label: "공과금납부", desc: "요금 납부", emoji: "🏛️", color: "bg-gray-600" },
-    ];
-
-    const handleService = (id: string) => {
-      setService(id as Service);
-      if (id === "withdrawal") setStep("withdrawal-amount");
-      else if (id === "balance") setStep("balance-result");
-      else if (id === "transfer") setStep("transfer-bank");
-      else if (id === "deposit") setStep("deposit-insert");
-      else if (id === "passbook") setStep("passbook-insert");
-      else if (id === "utility") setStep("confirm");
-    };
-
-    return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-4">
-          <h2 className="text-center text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-            원하시는 업무를 선택하세요
-          </h2>
-          <div className="grid grid-cols-2 gap-4 flex-1">
-            {services.map((svc) => (
-              <button
-                key={svc.id}
-                onClick={() => handleService(svc.id)}
-                className={`${svc.color} hover:opacity-90 text-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 shadow-xl active:scale-95 transition-all`}
-              >
-                <span style={{ fontSize: "44px" }}>{svc.emoji}</span>
-                <span style={{ fontSize: "24px", fontWeight: "700" }}>{svc.label}</span>
-                <span style={{ fontSize: "17px", opacity: 0.9 }}>{svc.desc}</span>
-              </button>
-            ))}
-          </div>
         </div>
         <CancelBar onCancel={reset} />
       </div>
@@ -258,10 +281,7 @@ export default function BankPage() {
             {QUICK_AMOUNTS.map((amount) => (
               <button
                 key={amount}
-                onClick={() => {
-                  setWithdrawalAmount(amount);
-                  setStep("confirm");
-                }}
+                onClick={() => { setWithdrawalAmount(amount); setStep("confirm"); }}
                 className="bg-white hover:bg-green-50 border-4 border-gray-200 hover:border-green-600 text-gray-800 rounded-2xl py-7 text-center shadow active:scale-95 transition-all"
               >
                 <span style={{ fontSize: "26px", fontWeight: "700" }}>{amount.toLocaleString()}원</span>
@@ -275,7 +295,7 @@ export default function BankPage() {
             </p>
           </div>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
+        <CancelBar onCancel={reset} onBack={() => setStep("pin")} />
       </div>
     );
   }
@@ -297,17 +317,8 @@ export default function BankPage() {
           </div>
 
           <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("service")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>다른 업무 보기</span>
-            </button>
-            <button
-              onClick={reset}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>종료 (카드 반환)</span>
+            <button onClick={reset} className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all">
+              <span style={{ fontSize: "24px", fontWeight: "700" }}>처음으로 돌아가기</span>
             </button>
           </div>
         </div>
@@ -340,7 +351,7 @@ export default function BankPage() {
             ))}
           </div>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
+        <CancelBar onCancel={reset} onBack={() => setStep("pin")} />
       </div>
     );
   }
@@ -352,12 +363,8 @@ export default function BankPage() {
         <AtmHeader />
         <div className="flex-1 bg-white flex flex-col p-6 gap-5">
           <div className="text-center">
-            <h2 className="text-gray-800" style={{ fontSize: "28px", fontWeight: "700" }}>
-              계좌번호를 입력하세요
-            </h2>
-            <p className="text-green-700 mt-1" style={{ fontSize: "20px", fontWeight: "600" }}>
-              선택된 은행: {transferBank}
-            </p>
+            <h2 className="text-gray-800" style={{ fontSize: "28px", fontWeight: "700" }}>계좌번호를 입력하세요</h2>
+            <p className="text-green-700 mt-1" style={{ fontSize: "20px", fontWeight: "600" }}>선택된 은행: {transferBank}</p>
           </div>
 
           <div className="bg-gray-100 border-2 border-gray-300 rounded-xl p-5 text-center min-h-[70px] flex items-center justify-center">
@@ -371,10 +378,7 @@ export default function BankPage() {
           </div>
 
           {transferAccount.length >= 10 && (
-            <button
-              onClick={() => setStep("transfer-amount")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
+            <button onClick={() => setStep("transfer-amount")} className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all">
               <span style={{ fontSize: "24px", fontWeight: "700" }}>다음 →</span>
             </button>
           )}
@@ -419,10 +423,7 @@ export default function BankPage() {
           </div>
 
           {transferAmount && Number(transferAmount) > 0 && (
-            <button
-              onClick={() => setStep("confirm")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
+            <button onClick={() => setStep("confirm")} className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all">
               <span style={{ fontSize: "24px", fontWeight: "700" }}>다음 →</span>
             </button>
           )}
@@ -438,23 +439,17 @@ export default function BankPage() {
       <div className="min-h-screen bg-gray-800 flex flex-col">
         <AtmHeader />
         <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>입금</p>
-          </div>
           <div className="bg-orange-50 border-4 border-orange-200 rounded-3xl p-10 w-full max-w-sm text-center">
             <div className="text-7xl mb-5">💵</div>
             <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.7" }}>
               현금을 투입구에<br />넣어주세요
             </p>
           </div>
-          <button
-            onClick={() => setStep("complete")}
-            className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all"
-          >
+          <button onClick={() => setStep("complete")} className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all">
             <span style={{ fontSize: "26px", fontWeight: "700" }}>현금 넣기 완료</span>
           </button>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
+        <CancelBar onCancel={reset} onBack={() => setStep("pin")} />
       </div>
     );
   }
@@ -465,23 +460,17 @@ export default function BankPage() {
       <div className="min-h-screen bg-gray-800 flex flex-col">
         <AtmHeader />
         <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>통장정리</p>
-          </div>
           <div className="bg-teal-50 border-4 border-teal-200 rounded-3xl p-10 w-full max-w-sm text-center">
             <div className="text-7xl mb-5">📔</div>
             <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.7" }}>
               통장을 투입구에<br />넣어주세요
             </p>
           </div>
-          <button
-            onClick={() => setStep("complete")}
-            className="w-full max-w-sm bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all"
-          >
+          <button onClick={() => setStep("complete")} className="w-full max-w-sm bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all">
             <span style={{ fontSize: "26px", fontWeight: "700" }}>통장 넣기 완료</span>
           </button>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
+        <CancelBar onCancel={reset} onBack={() => setStep("pin")} />
       </div>
     );
   }
@@ -497,9 +486,7 @@ export default function BankPage() {
       <div className="min-h-screen bg-gray-800 flex flex-col">
         <AtmHeader />
         <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 gap-8">
-          <h2 className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-            거래 내역을 확인하세요
-          </h2>
+          <h2 className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>거래 내역을 확인하세요</h2>
 
           <div className="w-full max-w-sm bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 space-y-4">
             <div className="flex justify-between items-center pb-4 border-b-2 border-gray-200">
@@ -512,9 +499,7 @@ export default function BankPage() {
             {service === "withdrawal" && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-600" style={{ fontSize: "21px" }}>출금 금액</span>
-                <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>
-                  {withdrawalAmount.toLocaleString()}원
-                </span>
+                <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>{withdrawalAmount.toLocaleString()}원</span>
               </div>
             )}
 
@@ -530,9 +515,7 @@ export default function BankPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600" style={{ fontSize: "21px" }}>이체 금액</span>
-                  <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>
-                    {Number(transferAmount).toLocaleString()}원
-                  </span>
+                  <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>{Number(transferAmount).toLocaleString()}원</span>
                 </div>
               </>
             )}
@@ -545,17 +528,14 @@ export default function BankPage() {
           </div>
 
           <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("complete")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
-            >
+            <button onClick={() => setStep("complete")} className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all">
               <span style={{ fontSize: "26px", fontWeight: "700" }}>확인 (거래 진행)</span>
             </button>
             <button
               onClick={() => {
                 if (service === "withdrawal") setStep("withdrawal-amount");
                 else if (service === "transfer") setStep("transfer-amount");
-                else setStep("service");
+                else setStep("pin");
               }}
               className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
             >
@@ -583,18 +563,12 @@ export default function BankPage() {
           </div>
 
           <div className="text-center">
-            <h2 className="text-green-800" style={{ fontSize: "34px", fontWeight: "700" }}>
-              거래가 완료되었습니다
-            </h2>
+            <h2 className="text-green-800" style={{ fontSize: "34px", fontWeight: "700" }}>거래가 완료되었습니다</h2>
             {service === "withdrawal" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>
-                현금 {withdrawalAmount.toLocaleString()}원을 가져가세요
-              </p>
+              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>현금 {withdrawalAmount.toLocaleString()}원을 가져가세요</p>
             )}
             {service === "transfer" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>
-                {Number(transferAmount).toLocaleString()}원이 이체되었습니다
-              </p>
+              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>{Number(transferAmount).toLocaleString()}원이 이체되었습니다</p>
             )}
             {service === "deposit" && (
               <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>입금이 완료되었습니다</p>
@@ -615,22 +589,10 @@ export default function BankPage() {
           </div>
 
           <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("service")}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>다른 업무 보기</span>
+            <button onClick={reset} className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all">
+              <span style={{ fontSize: "22px", fontWeight: "700" }}>처음으로 돌아가기</span>
             </button>
-            <button
-              onClick={reset}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>종료 (카드 반환)</span>
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
+            <button onClick={() => navigate("/")} className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all">
               <span style={{ fontSize: "22px", fontWeight: "700" }}>홈으로</span>
             </button>
           </div>

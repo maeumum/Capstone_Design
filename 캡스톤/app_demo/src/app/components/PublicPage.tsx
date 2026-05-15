@@ -238,7 +238,7 @@ export default function PublicPage() {
   // ── MAIN ─────────────────────────────────────────────────
   if (step === "main") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader />
 
         {/* Button grid */}
@@ -286,7 +286,7 @@ export default function PublicPage() {
   // ── SUB DOCUMENT ──────────────────────────────────────────
   if (step === "sub-doc" && selectedCategory?.subDocs) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => setStep("main")} />
 
         <div className="flex-1 p-4 overflow-y-auto">
@@ -327,7 +327,7 @@ export default function PublicPage() {
   // ── AUTH SELECT ───────────────────────────────────────────
   if (step === "auth-select") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => selectedCategory?.subDocs ? setStep("sub-doc") : setStep("main")} />
 
         <div className="flex-1 p-4 overflow-y-auto">
@@ -378,7 +378,7 @@ export default function PublicPage() {
   if (step === "auth-scan") {
     const authLabel = AUTH_OPTIONS.find((a) => a.id === authMethod)?.label ?? "신분증";
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => setStep("auth-select")} />
 
         <div className="flex-1 flex flex-col items-center justify-center gap-6 p-6">
@@ -419,7 +419,7 @@ export default function PublicPage() {
   // ── AUTH PIN ──────────────────────────────────────────────
   if (step === "auth-pin") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => setStep("auth-select")} />
 
         <div className="flex-1 flex flex-col p-5 gap-5">
@@ -465,7 +465,7 @@ export default function PublicPage() {
   // ── OPTIONS ───────────────────────────────────────────────
   if (step === "options" && selectedDoc) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => setStep(authMethod === "certificate" ? "auth-pin" : "auth-scan")} />
 
         <div className="flex-1 overflow-y-auto p-4 pb-28 space-y-4">
@@ -571,7 +571,7 @@ export default function PublicPage() {
   // ── PAYMENT ───────────────────────────────────────────────
   if (step === "payment" && selectedDoc) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader onBack={() => setStep("options")} />
 
         <div className="flex-1 flex flex-col p-4 gap-4">
@@ -623,7 +623,7 @@ export default function PublicPage() {
   // ── COMPLETE ──────────────────────────────────────────────
   if (step === "complete" && selectedDoc) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#d0d0d0" }}>
+      <div className="min-h-svh flex flex-col" style={{ background: "#d0d0d0" }}>
         <SkyHeader />
 
         <div className="flex-1 flex flex-col items-center justify-center p-8 gap-7">

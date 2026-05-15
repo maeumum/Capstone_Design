@@ -200,7 +200,7 @@ export default function KTXPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-purple-100 p-6">
+    <div className="min-h-svh bg-gradient-to-b from-purple-50 to-purple-100 p-6">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={handleBackByStep}

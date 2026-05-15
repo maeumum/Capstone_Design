@@ -160,7 +160,7 @@ export default function TableOrderPage() {
   // ── ORDER HISTORY ─────────────────────────────────────────
   if (showHistory) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-svh bg-gray-50 flex flex-col">
         {/* Header */}
         <div className="px-4 py-4 flex items-center gap-3 text-white" style={{ background: "#1c1c1e" }}>
           <button onClick={() => setShowHistory(false)} className="text-gray-300">
@@ -231,7 +231,7 @@ export default function TableOrderPage() {
   if (step === "complete") {
     const lastOrder = orderHistory[orderHistory.length - 1];
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-svh bg-gray-50 flex flex-col">
         <div className="px-4 py-4 text-center text-white" style={{ background: "#1c1c1e" }}>
           <span className="font-black" style={{ fontSize: "20px" }}>{RESTAURANT}</span>
           <span className="text-gray-400 ml-3" style={{ fontSize: "14px" }}>테이블 {TABLE_NUM}</span>
@@ -306,7 +306,7 @@ export default function TableOrderPage() {
   // ── CONFIRM ───────────────────────────────────────────────
   if (step === "confirm") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-svh bg-gray-50 flex flex-col">
         <div className="px-4 py-4 flex items-center gap-3 text-white" style={{ background: "#1c1c1e" }}>
           <button onClick={() => setStep("menu")} className="text-gray-300">
             <X size={26} />
@@ -391,7 +391,7 @@ export default function TableOrderPage() {
   const filtered = MENU_ITEMS.filter((m) => m.category === activeTab);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-svh bg-gray-50 flex flex-col">
       {showCall && <CallModal />}
 
       {/* Top header */}

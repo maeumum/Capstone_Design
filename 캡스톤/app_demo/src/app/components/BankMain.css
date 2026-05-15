@@ -1,0 +1,390 @@
+/* ========================================================================
+   ATM Touchscreen UI — static layout
+   Aspect: 16:10 (1280 × 800), the typical Korean ATM touchscreen ratio.
+   The .atm-screen element is the canvas; outer page just centers it.
+   ======================================================================== */
+
+:root {
+  --screen-w: 1280px;
+  --screen-h: 800px;
+
+  /* Background — soft sky-to-white wash */
+  --bg-top: #cfe6f5;
+  --bg-mid: #e8f3fa;
+  --bg-bot: #ffffff;
+
+  /* Button family — glossy blue capsule */
+  --btn-blue-1: #d5e7fb;   /* top highlight */
+  --btn-blue-2: #6fa9e4;   /* mid */
+  --btn-blue-3: #3a7fc9;   /* lower mid */
+  --btn-blue-4: #1f5fa8;   /* bottom shade */
+  --btn-text:   #0b3a7a;
+
+  /* Highlight (active / selected) — warm orange */
+  --btn-orange-1: #ffe3a8;
+  --btn-orange-2: #ff9a3c;
+  --btn-orange-3: #f37314;
+  --btn-orange-text: #6a2a00;
+
+  /* Language pill — soft green */
+  --btn-green-1: #e3f3d4;
+  --btn-green-2: #a8d680;
+  --btn-green-3: #6fb43d;
+  --btn-green-text: #2a4d10;
+
+  /* Big primary action — deep blue */
+  --btn-deep-1: #6aa3df;
+  --btn-deep-2: #2c63a8;
+  --btn-deep-3: #143e75;
+
+  --info-text: #2a3a55;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #2c2f33;
+  font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- The screen itself --------------------------------------------------- */
+.atm-screen {
+  width: var(--screen-w);
+  height: var(--screen-h);
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--bg-top) 0%,
+      var(--bg-mid) 22%,
+      var(--bg-bot) 55%,
+      var(--bg-bot) 100%
+    );
+  box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  /* faint diagonal scanlines, like the real touch panel reflection */
+}
+.atm-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0) 6px,
+      rgba(255,255,255,.18) 6px,
+      rgba(255,255,255,.18) 7px
+    );
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .35;
+}
+
+/* Scale screen down to fit smaller viewports */
+@media (max-width: 1340px) {
+  .atm-screen {
+    transform: scale(calc(100vw / 1340));
+    transform-origin: top center;
+  }
+  body { align-items: flex-start; padding-top: 20px; }
+}
+
+/* ---- Header band (slogan + bank logo placeholder) ------------------------ */
+.atm-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 110px;
+  padding: 0 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slogan-slot,
+.logo-slot {
+  height: 64px;
+  border: 1.5px dashed rgba(40, 80, 140, .35);
+  border-radius: 8px;
+  background: rgba(255,255,255,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  color: rgba(40, 80, 140, .55);
+  letter-spacing: .04em;
+}
+.slogan-slot { width: 460px; }
+.logo-slot   { width: 280px; }
+
+/* ---- Main layout: three columns (left buttons | center | right buttons) -- */
+.atm-body {
+  position: absolute;
+  top: 110px; left: 0; right: 0; bottom: 0;
+  padding: 6px 40px 40px;
+  display: grid;
+  grid-template-columns: 290px 1fr 290px;
+  column-gap: 28px;
+}
+
+/* ---- Side button columns ------------------------------------------------- */
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+/* ---- Capsule button (the core component) --------------------------------- */
+.btn {
+  --c1: var(--btn-blue-1);
+  --c2: var(--btn-blue-2);
+  --c3: var(--btn-blue-3);
+  --c4: var(--btn-blue-4);
+  --tx: var(--btn-text);
+
+  position: relative;
+  height: 78px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255,255,255,.85);
+  background:
+    linear-gradient(
+      to bottom,
+      var(--c1) 0%,
+      var(--c2) 38%,
+      var(--c3) 62%,
+      var(--c4) 100%
+    );
+  color: var(--tx);
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.6) inset,
+    0 -6px 14px rgba(10, 40, 90, .25) inset,
+    0 6px 12px rgba(20, 50, 100, .25),
+    0 1px 0 rgba(255,255,255,.5);
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  cursor: default;
+}
+
+/* Glossy top highlight */
+.btn::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 6px;
+  height: 34%;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,.85) 0%,
+    rgba(255,255,255,.35) 60%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
+}
+
+.btn.small-text  { font-size: 21px; }
+.btn.smaller-text { font-size: 19px; }
+.btn.two-line     { line-height: 1.1; }
+
+/* Variants */
+.btn.orange {
+  --c1: var(--btn-orange-1);
+  --c2: #ffbf6a;
+  --c3: var(--btn-orange-2);
+  --c4: var(--btn-orange-3);
+  --tx: var(--btn-orange-text);
+}
+.btn.green {
+  --c1: var(--btn-green-1);
+  --c2: #c7e3a4;
+  --c3: var(--btn-green-2);
+  --c4: var(--btn-green-3);
+  --tx: var(--btn-green-text);
+  font-size: 22px;
+}
+.btn.deep {
+  --c1: #b8d4f0;
+  --c2: var(--btn-deep-1);
+  --c3: var(--btn-deep-2);
+  --c4: var(--btn-deep-3);
+  --tx: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+
+/* ---- Center column ------------------------------------------------------- */
+.center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 4px;
+  gap: 14px;
+}
+
+.poster-frame {
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 16 / 10;
+  background: #ffffff;
+  border: 1px solid #b9cad8;
+  border-radius: 6px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 4px 14px rgba(40, 70, 120, .15);
+}
+
+.info-block {
+  width: 100%;
+  max-width: 460px;
+  color: var(--info-text);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 4px 6px 0;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 110px 14px 1fr;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.info-row .k  { font-weight: 700; }
+.info-row .s  { font-weight: 700; }
+.info-row .v  { font-weight: 700; }
+
+.info-notes {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Big bottom action button (화면확대) */
+.btn-zoom {
+  margin-top: 6px;
+  width: 100%;
+  max-width: 460px;
+  height: 108px;
+  border-radius: 22px;
+  color: #fff;
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border: 1.5px solid rgba(255,255,255,.9);
+  background:
+    linear-gradient(
+      to bottom,
+      #b8d4f0 0%,
+      var(--btn-deep-1) 28%,
+      var(--btn-deep-2) 60%,
+      var(--btn-deep-3) 100%
+    );
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.55) inset,
+    0 -10px 22px rgba(8, 28, 65, .35) inset,
+    0 8px 18px rgba(15, 40, 80, .35);
+  text-shadow: 0 2px 2px rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  position: relative;
+}
+.btn-zoom::before {
+  content: "";
+  position: absolute;
+  top: 7px; left: 24px; right: 24px;
+  height: 30%;
+  border-radius: 18px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,.55) 0%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
+}
+.btn-zoom .zoom-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 900;
+  position: relative;
+  box-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.btn-zoom .zoom-icon::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: -6px;
+  width: 14px;
+  height: 4px;
+  background: #fff;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  box-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.btn-zoom .label-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+}
+.btn-zoom .label-sub {
+  font-size: 22px;
+  font-weight: 700;
+  opacity: .95;
+  margin-top: 4px;
+}
+
+/* ========================================================================
+   PHONE FRAME  (ATM Screen Mobile.html 전용)
+   390×844(9:19.5) 폰 안에 landscape ATM(1280×800)을 너비에 맞게 축소,
+   위아래 검은 레터박스로 수직 중앙 정렬.
+   ======================================================================== */
+
+/* 폰 화면 전체를 검정으로 채우고 ATM을 수직 중앙에 둠 */
+.phone-frame {
+  width: 100vw;
+  height: 100svh;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 레터박스 높이 = (화면높이 - ATM 시각 높이) / 2
+     ATM 시각 높이 = 800px × (100vw / 1280) = 62.5vw              */
+  padding-top: max(0px, calc((100svh - 62.5vw) / 2));
+  font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+/* 기존 media query의 scale(100vw/1340) 을 scale(100vw/1280) 으로 덮어씀
+   → ATM 너비가 폰 너비와 정확히 일치                              */
+.phone-frame .atm-screen {
+  transform: scale(calc(100vw / 1280)) !important;
+  transform-origin: top center !important;
+  box-shadow: none;
+}

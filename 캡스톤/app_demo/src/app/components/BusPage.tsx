@@ -1,487 +1,550 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  ArrowLeft,
-  ArrowLeftRight,
-  Bus,
-  CalendarDays,
-  ChevronRight,
-  HelpCircle,
-  LogOut,
-  MapPin,
-  Ticket,
-  Undo2,
-} from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, ChevronLeft, ChevronRight, RefreshCw, Star, Check, Plus, Minus } from "lucide-react";
 
-/**
- * UI·UX 참고: 비그플 키오스크 체험 (고속버스 예매)
- * http://www.xn--2i0b122a69q.kr/usquare/index.do
- */
+type Screen = "search" | "results" | "passengers" | "payment" | "complete";
 
-const KIOSK_TERMINAL = "광주 (유·스퀘어) No.30";
+type Grade = "일반" | "우등" | "프리미엄";
 
-const TERMINALS = [
-  "동서울",
-  "서울남부",
-  "서울서부",
-  "고양",
-  "인천",
-  "부산",
-  "대전복합",
-  "광주(유·스퀘어)",
-  "전주",
-  "강릉",
-  "울산",
-  "창원",
-];
-
-const WEEKDAY_KO = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-
-function formatDateKorean(isoDate: string) {
-  const [y, m, d] = isoDate.split("-").map(Number);
-  const dt = new Date(y, m - 1, d);
-  const wd = WEEKDAY_KO[dt.getDay()];
-  return `${isoDate} ${wd}`;
-}
-
-function pad2(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-type Screen = "menu" | "search" | "results";
-
-type BusTrip = {
+interface BusTrip {
   id: string;
   company: string;
   departureTime: string;
-  arrivalTime: string;
   duration: string;
   price: number;
   seatsLeft: number;
-  grade: "일반" | "우등" | "프리미엄";
-};
+  grade: Grade;
+}
 
-const BASE_TRIPS: Omit<BusTrip, "price" | "seatsLeft">[] = [
-  { id: "b1", company: "금호고속", departureTime: "07:10", arrivalTime: "10:25", duration: "3시간 15분", grade: "우등" },
-  { id: "b2", company: "삼화고속", departureTime: "08:30", arrivalTime: "11:40", duration: "3시간 10분", grade: "일반" },
-  { id: "b3", company: "경기고속", departureTime: "10:00", arrivalTime: "13:05", duration: "3시간 5분", grade: "우등" },
-  { id: "b4", company: "한양고속", departureTime: "12:20", arrivalTime: "15:35", duration: "3시간 15분", grade: "프리미엄" },
-  { id: "b5", company: "삼화고속", departureTime: "14:50", arrivalTime: "17:55", duration: "3시간 5분", grade: "일반" },
-  { id: "b6", company: "동양고속", departureTime: "17:00", arrivalTime: "20:15", duration: "3시간 15분", grade: "우등" },
-  { id: "b7", company: "금호고속", departureTime: "19:20", arrivalTime: "22:30", duration: "3시간 10분", grade: "우등" },
-  { id: "b8", company: "경기고속", departureTime: "21:00", arrivalTime: "00:05", duration: "3시간 5분", grade: "일반" },
+const TERMINALS = [
+  "전주고속터미널",
+  "센트럴시티(서울)",
+  "동서울터미널",
+  "서울남부터미널",
+  "인천종합터미널",
+  "부산종합터미널",
+  "대전복합터미널",
+  "광주유스퀘어",
+  "대구북부터미널",
+  "강릉고속터미널",
+  "울산고속터미널",
+  "창원종합터미널",
 ];
 
-function hashRoute(dep: string, arr: string, date: string): number {
-  const s = `${dep}|${arr}|${date}`;
+const COMPANIES = ["동양고속", "금호고속", "천일고속", "삼화고속", "경기고속", "한양고속"];
+
+const BASE_TIMES = [
+  "05:00", "05:15", "05:30", "05:45",
+  "06:00", "06:30", "07:00", "07:30",
+  "08:00", "09:00", "10:00", "11:00",
+  "12:00", "13:30", "15:00", "17:00",
+  "18:30", "20:00", "21:30", "22:50",
+];
+
+const DAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+function formatDisplay(isoDate: string) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const day = DAYS_KO[new Date(y, m - 1, d).getDay()];
+  return `${y}.${String(m).padStart(2, "0")}.${String(d).padStart(2, "0")}(${day})`;
+}
+
+function hash(s: string) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
   return h;
 }
 
-function buildSchedule(dep: string, arr: string, date: string): BusTrip[] {
-  const h = hashRoute(dep, arr, date);
-  const basePrice = 18000 + (h % 7) * 2500;
-
-  return BASE_TRIPS.map((t, i) => {
-    const offset = ((h >> (i % 4)) + i * 3) % 9;
+function buildTrips(dep: string, arr: string, date: string): BusTrip[] {
+  const h = hash(`${dep}|${arr}|${date}`);
+  const grades: Grade[] = ["일반", "우등", "프리미엄"];
+  const basePrices: Record<Grade, number> = { 일반: 17000, 우등: 22000, 프리미엄: 28600 };
+  return BASE_TIMES.map((time, i) => {
+    const grade = grades[((h >> i) + i) % 3];
+    const company = COMPANIES[((h >> (i + 2)) + i * 3) % COMPANIES.length];
+    const seats = 4 + ((h + i * 7) % 38);
+    const priceVariant = ((h >> (i + 1)) % 3) * 500;
     return {
-      ...t,
-      price: basePrice + offset * 500 + (t.grade === "프리미엄" ? 8000 : t.grade === "우등" ? 3000 : 0),
-      seatsLeft: 12 + ((h + i * 5) % 33),
+      id: `trip-${i}`,
+      company,
+      departureTime: time,
+      duration: "약 2시간 35분",
+      price: basePrices[grade] + priceVariant,
+      seatsLeft: seats,
+      grade,
     };
   });
+}
+
+// 등급 badge 스타일
+function GradeBadge({ grade }: { grade: Grade }) {
+  if (grade === "프리미엄")
+    return (
+      <span className="inline-block rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: "#FFE4EC", color: "#D63384" }}>
+        프리미엄
+      </span>
+    );
+  if (grade === "우등")
+    return (
+      <span className="inline-block rounded-full border px-2 py-0.5 text-xs font-bold" style={{ borderColor: "#F48FB1", color: "#C2185B" }}>
+        우등
+      </span>
+    );
+  return (
+    <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-500">
+      일반
+    </span>
+  );
 }
 
 export default function BusPage() {
   const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
 
-  const [screen, setScreen] = useState<Screen>("menu");
-  const [nowText, setNowText] = useState("");
-  const [departure, setDeparture] = useState("광주(유·스퀘어)");
-  const [arrival, setArrival] = useState("서울남부");
+  const [screen, setScreen] = useState<Screen>("search");
+  const [departure, setDeparture] = useState("전주고속터미널");
+  const [arrival, setArrival] = useState("센트럴시티(서울)");
   const [travelDate, setTravelDate] = useState(today);
-  const [lang, setLang] = useState<"ko" | "en" | "zh" | "ja">("ko");
+  const [selectedTrip, setSelectedTrip] = useState<BusTrip | null>(null);
+  const [adults, setAdults] = useState(1);
+  const [kids, setKids] = useState(0);
+  const [seniors, setSeniors] = useState(0);
+  const [bookingNum] = useState(() => Math.floor(Math.random() * 900000 + 100000));
 
-  const results = useMemo(
-    () => buildSchedule(departure, arrival, travelDate),
-    [departure, arrival, travelDate],
-  );
+  const trips = useMemo(() => buildTrips(departure, arrival, travelDate), [departure, arrival, travelDate]);
 
-  useEffect(() => {
-    function tick() {
-      const n = new Date();
-      setNowText(`${pad2(n.getHours())}:${pad2(n.getMinutes())}:${pad2(n.getSeconds())}`);
-    }
-    tick();
-    const t = window.setInterval(tick, 1000);
-    return () => window.clearInterval(t);
-  }, []);
+  const totalPassengers = adults + kids + seniors;
+  const totalPrice = selectedTrip
+    ? selectedTrip.price * adults + Math.floor(selectedTrip.price * 0.5) * kids + Math.floor(selectedTrip.price * 0.5) * seniors
+    : 0;
 
-  function swapTerminals() {
-    setDeparture(arrival);
-    setArrival(departure);
-  }
+  const shiftDate = (delta: number) => {
+    const d = new Date(travelDate);
+    d.setDate(d.getDate() + delta);
+    if (d >= new Date(today)) setTravelDate(d.toISOString().split("T")[0]);
+  };
 
-  function handleSearch() {
-    if (departure === arrival) {
-      alert("출발지와 도착지가 같을 수 없습니다.");
-      return;
-    }
-    if (!travelDate) {
-      alert("가는 날을 선택해 주세요.");
-      return;
-    }
-    setScreen("results");
-  }
-
-  function handleBack() {
-    if (screen === "results") {
-      setScreen("search");
-      return;
-    }
-    if (screen === "search") {
-      setScreen("menu");
-      return;
-    }
-    navigate("/");
-  }
-
-  function handleExitKiosk() {
-    navigate("/");
-  }
-
-  const langLabel =
-    lang === "ko"
-      ? "한국어"
-      : lang === "en"
-        ? "English"
-        : lang === "zh"
-          ? "中文"
-          : "日本語";
-
-  return (
-    <div className="min-h-screen bg-[#e9ecef] flex flex-col">
-      {/* 키오스크 상단: 터미널 · 날짜 · 시각 (참고 사이트 레이아웃) */}
-      <header className="bg-[#1c2834] text-white shrink-0 shadow-lg">
-        <div className="max-w-3xl mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="font-black tracking-tight text-amber-300/95 truncate" style={{ fontSize: "clamp(18px,4vw,26px)" }}>
-                {KIOSK_TERMINAL}
-              </p>
-              <p className="mt-1 text-white/90 font-semibold" style={{ fontSize: "clamp(15px,3.2vw,20px)" }}>
-                {formatDateKorean(today)}
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="text-white/75 text-sm sm:text-base font-medium">현재시간</p>
-              <p className="font-mono font-bold tabular-nums text-amber-300" style={{ fontSize: "clamp(22px,5vw,34px)" }}>
-                {nowText || "—"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3">
-            <span className="inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-sm sm:text-base font-bold text-amber-200">
-              현금·카드 겸용 / 환불
-            </span>
-            <button
-              type="button"
-              onClick={handleExitKiosk}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 font-bold hover:bg-white/20 active:scale-[0.98]"
-              style={{ fontSize: "16px" }}
-            >
-              <LogOut size={20} />
-              나가기
-            </button>
-          </div>
+  // ── SEARCH ────────────────────────────────────────────────
+  if (screen === "search") {
+    return (
+      <div className="min-h-svh bg-white flex flex-col">
+        {/* 헤더 */}
+        <div className="flex items-center px-4 py-4 border-b border-gray-100">
+          <button onClick={() => navigate("/")} className="text-gray-700 mr-3">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-gray-900" style={{ fontSize: "18px" }}>
+            버스 예매
+          </h1>
+          <div style={{ width: 24 }} />
         </div>
-      </header>
 
-      {/* 언어 선택 바 */}
-      <div className="bg-white border-b border-gray-200 shrink-0">
-        <div className="max-w-3xl mx-auto px-2 py-2 flex flex-wrap justify-center gap-2">
-          {(
-            [
-              { id: "ko" as const, label: "한국어" },
-              { id: "en" as const, label: "English" },
-              { id: "zh" as const, label: "中文" },
-              { id: "ja" as const, label: "日本語" },
-            ]
-          ).map((L) => (
+        <div className="flex-1 p-5 space-y-4">
+          {/* 출발·도착 */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <p className="text-xs text-gray-400 font-semibold mb-1">출발지</p>
+                <select
+                  value={departure}
+                  onChange={(e) => setDeparture(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 font-bold text-gray-900"
+                  style={{ fontSize: "17px" }}
+                >
+                  {TERMINALS.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+
+              <button
+                onClick={() => { setDeparture(arrival); setArrival(departure); }}
+                className="mt-5 w-10 h-10 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center active:scale-95 transition-all"
+              >
+                <ArrowLeftRight size={18} className="text-gray-500" />
+              </button>
+
+              <div className="flex-1">
+                <p className="text-xs text-gray-400 font-semibold mb-1">도착지</p>
+                <select
+                  value={arrival}
+                  onChange={(e) => setArrival(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 font-bold text-gray-900"
+                  style={{ fontSize: "17px" }}
+                >
+                  {TERMINALS.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* 날짜 */}
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <p className="text-xs text-gray-400 font-semibold mb-2">가는 날</p>
+            <input
+              type="date"
+              min={today}
+              value={travelDate}
+              onChange={(e) => setTravelDate(e.target.value)}
+              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 font-bold text-gray-900"
+              style={{ fontSize: "17px" }}
+            />
+            <p className="text-sm text-gray-500 mt-2 font-medium">{formatDisplay(travelDate)}</p>
+          </div>
+
+          {/* 조회 버튼 */}
+          <button
+            onClick={() => {
+              if (departure === arrival) { alert("출발지와 도착지가 같을 수 없습니다."); return; }
+              setScreen("results");
+            }}
+            className="w-full text-white rounded-2xl py-5 font-bold shadow-lg active:scale-95 transition-all"
+            style={{ background: "#1A6FE8", fontSize: "20px" }}
+          >
+            조회하기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── RESULTS (배차 조회) ───────────────────────────────────
+  if (screen === "results") {
+    return (
+      <div className="min-h-svh bg-white flex flex-col">
+        {/* 헤더 */}
+        <div className="flex items-center px-4 py-4 border-b border-gray-100">
+          <button onClick={() => setScreen("search")} className="text-gray-700 mr-3">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-gray-900" style={{ fontSize: "18px" }}>
+            배차 조회
+          </h1>
+          <div style={{ width: 24 }} />
+        </div>
+
+        {/* 노선 표시 */}
+        <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-100">
+          <Star size={18} className="text-gray-400 fill-gray-300" />
+          <span className="font-bold text-gray-800" style={{ fontSize: "15px" }}>{departure}</span>
+          <ArrowLeft size={14} className="text-gray-400 rotate-180" />
+          <span className="font-bold text-gray-800" style={{ fontSize: "15px" }}>{arrival}</span>
+        </div>
+
+        {/* 날짜 네비게이션 */}
+        <div className="flex items-center px-4 py-3 border-b border-gray-100">
+          <button onClick={() => shiftDate(-1)} className="p-1 text-gray-500 active:scale-95">
+            <ChevronLeft size={22} />
+          </button>
+          <span className="flex-1 text-center font-bold text-gray-900" style={{ fontSize: "16px" }}>
+            {formatDisplay(travelDate)}
+          </span>
+          <button onClick={() => shiftDate(1)} className="p-1 text-gray-500 active:scale-95">
+            <ChevronRight size={22} />
+          </button>
+          <button className="ml-2 flex items-center gap-1 text-gray-500" style={{ fontSize: "13px" }}>
+            검색 조건
+            <ChevronRight size={14} className="rotate-90" />
+          </button>
+        </div>
+
+        {/* 버스 목록 */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 pb-24 space-y-3">
+          {trips.map((trip) => (
             <button
-              key={L.id}
-              type="button"
-              onClick={() => setLang(L.id)}
-              className={`rounded-lg px-4 py-2 font-bold border-2 transition-all ${
-                lang === L.id
-                  ? "border-[#c45c26] bg-orange-50 text-[#8b4513]"
-                  : "border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-400"
-              }`}
-              style={{ fontSize: "15px" }}
+              key={trip.id}
+              onClick={() => { setSelectedTrip(trip); setScreen("passengers"); }}
+              className="w-full text-left bg-white rounded-2xl border border-gray-150 shadow-sm p-4 active:scale-[0.99] transition-all"
+              style={{ boxShadow: "0 1px 6px rgba(0,0,0,0.08)" }}
             >
-              {L.label}
+              {/* 상단: 회사 + 상세보기 */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="text-white rounded px-1.5 py-0.5 font-black"
+                    style={{ fontSize: "11px", background: "#1A6FE8" }}
+                  >
+                    고
+                  </div>
+                  <span className="font-semibold text-gray-700" style={{ fontSize: "14px" }}>
+                    {trip.company}
+                  </span>
+                </div>
+                <span
+                  className="border border-gray-300 text-gray-500 rounded-full px-3 py-1 font-medium"
+                  style={{ fontSize: "12px" }}
+                >
+                  상세보기
+                </span>
+              </div>
+
+              {/* 중단: 시간 + 가격 */}
+              <div className="flex items-end justify-between">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-black text-gray-900" style={{ fontSize: "28px" }}>
+                    {trip.departureTime}
+                  </span>
+                  <span className="text-gray-400" style={{ fontSize: "13px" }}>
+                    {trip.duration}
+                  </span>
+                </div>
+                <span className="font-black text-gray-900" style={{ fontSize: "24px" }}>
+                  {trip.price.toLocaleString()}원
+                </span>
+              </div>
+
+              {/* 하단: 등급 + 잔여석 */}
+              <div className="flex items-center gap-2 mt-2">
+                <GradeBadge grade={trip.grade} />
+                <span className="font-bold" style={{ fontSize: "13px", color: "#FF6B35" }}>
+                  {trip.seatsLeft}석 남음
+                </span>
+              </div>
             </button>
           ))}
         </div>
+
+        {/* 하단 안내 */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between">
+          <p className="text-gray-400 flex-1" style={{ fontSize: "12px", lineHeight: "1.5" }}>
+            소요 시간은 교통상황에 따라 달라질 수 있습니다.<br />
+            요금정보는 상세보기를 선택하셔서 확인하실 수 있습니다.
+          </p>
+          <button
+            onClick={() => setTravelDate(travelDate)}
+            className="ml-3 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center active:scale-95 transition-all"
+          >
+            <RefreshCw size={16} className="text-gray-500" />
+          </button>
+        </div>
       </div>
+    );
+  }
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 py-4 pb-8">
-        {screen === "menu" && (
-          <div className="space-y-4">
-            <div className="rounded-2xl bg-amber-50 border-2 border-amber-200 px-4 py-3 flex items-start gap-3">
-              <HelpCircle className="text-amber-800 shrink-0 mt-0.5" size={24} />
-              <div>
-                <p className="font-bold text-amber-950" style={{ fontSize: "17px" }}>
-                  고속버스 예매 키오스크
-                </p>
-                <p className="text-amber-900/90 mt-1" style={{ fontSize: "15px", lineHeight: 1.45 }}>
-                  원하시는 메뉴를 눌러 주세요. (연습용 · 실제 결제 없음)
-                </p>
-              </div>
+  // ── PASSENGERS ────────────────────────────────────────────
+  if (screen === "passengers" && selectedTrip) {
+    return (
+      <div className="min-h-svh bg-white flex flex-col">
+        <div className="flex items-center px-4 py-4 border-b border-gray-100">
+          <button onClick={() => setScreen("results")} className="text-gray-700 mr-3">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-gray-900" style={{ fontSize: "18px" }}>
+            인원 선택
+          </h1>
+          <div style={{ width: 24 }} />
+        </div>
+
+        <div className="flex-1 p-5 space-y-4">
+          {/* 선택 편 정보 */}
+          <div className="bg-blue-50 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-white rounded px-1.5 py-0.5 font-black" style={{ fontSize: "11px", background: "#1A6FE8" }}>고</div>
+              <span className="font-semibold text-gray-700" style={{ fontSize: "14px" }}>{selectedTrip.company}</span>
+              <GradeBadge grade={selectedTrip.grade} />
             </div>
-
-            <nav className="space-y-3" aria-label="메인 메뉴">
-              <button
-                type="button"
-                onClick={() => setScreen("search")}
-                className="w-full flex items-center gap-4 rounded-2xl bg-gradient-to-b from-[#2d5a3d] to-[#1e3f2c] text-white p-5 sm:p-6 shadow-xl border-2 border-[#1a3324] hover:brightness-110 active:scale-[0.99] transition-all text-left"
-              >
-                <div className="rounded-xl bg-white/15 p-3">
-                  <Ticket size={40} strokeWidth={2.2} />
-                </div>
-                <span className="font-black flex-1" style={{ fontSize: "clamp(22px,4.5vw,30px)" }}>
-                  승차권 구매
-                </span>
-                <ChevronRight size={36} className="opacity-90 shrink-0" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => alert("연습 화면: 예매한 승차권 조회·발권은 구현되지 않았습니다.")}
-                className="w-full flex items-center gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-md border-2 border-gray-300 hover:bg-gray-50 active:scale-[0.99] transition-all text-left"
-              >
-                <div className="rounded-xl bg-gray-100 p-3 text-gray-800">
-                  <Bus size={40} strokeWidth={2.2} />
-                </div>
-                <span className="font-black text-gray-900 flex-1" style={{ fontSize: "clamp(20px,4vw,28px)" }}>
-                  예매한 승차권
-                </span>
-                <ChevronRight size={36} className="text-gray-400 shrink-0" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => alert("연습 화면: 승차권 환불은 구현되지 않았습니다.")}
-                className="w-full flex items-center gap-4 rounded-2xl bg-white p-5 sm:p-6 shadow-md border-2 border-gray-300 hover:bg-gray-50 active:scale-[0.99] transition-all text-left"
-              >
-                <div className="rounded-xl bg-gray-100 p-3 text-gray-800">
-                  <Undo2 size={40} strokeWidth={2.2} />
-                </div>
-                <span className="font-black text-gray-900 flex-1" style={{ fontSize: "clamp(20px,4vw,28px)" }}>
-                  승차권 환불
-                </span>
-                <ChevronRight size={36} className="text-gray-400 shrink-0" />
-              </button>
-            </nav>
-
-            <p className="text-center text-red-700 font-bold bg-red-50 border border-red-200 rounded-xl py-3 px-4" style={{ fontSize: "15px" }}>
-              ※ 동전 사용 불가
-            </p>
-
-            <p className="text-center text-gray-500 text-sm">
-              참고 UI:{" "}
-              <a
-                href="http://www.xn--2i0b122a69q.kr/usquare/index.do"
-                className="text-[#1565c0] underline font-medium"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                비그플 키오스크 체험
-              </a>
-            </p>
-          </div>
-        )}
-
-        {screen === "search" && (
-          <div className="space-y-4">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-xl bg-white border-2 border-gray-300 px-4 py-3 font-bold text-gray-800 shadow-sm hover:bg-gray-50"
-              style={{ fontSize: "17px" }}
-            >
-              <ArrowLeft size={22} />
-              이전
-            </button>
-
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-              <div className="bg-[#2d5a3d] px-4 py-3">
-                <p className="text-white font-black text-center" style={{ fontSize: "19px" }}>
-                  노선 조회 ({langLabel})
-                </p>
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-2">
+                <span className="font-black text-gray-900" style={{ fontSize: "28px" }}>{selectedTrip.departureTime}</span>
+                <span className="text-gray-400" style={{ fontSize: "13px" }}>{selectedTrip.duration}</span>
               </div>
+              <span className="font-black text-gray-900" style={{ fontSize: "20px" }}>
+                {selectedTrip.price.toLocaleString()}원
+              </span>
+            </div>
+          </div>
 
-              <div className="p-4 sm:p-5">
-                <div className="flex items-stretch gap-2">
-                  <div className="flex-1 space-y-3">
-                    <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-3">
-                      <label className="flex items-center gap-2 text-gray-800 font-bold mb-2" style={{ fontSize: "14px" }}>
-                        <MapPin size={18} className="text-[#2d5a3d]" />
-                        출발지
-                      </label>
-                      <select
-                        value={departure}
-                        onChange={(e) => setDeparture(e.target.value)}
-                        className="w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-3 font-bold text-gray-900 min-h-[52px]"
-                        style={{ fontSize: "18px" }}
-                      >
-                        {TERMINALS.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-3">
-                      <label className="flex items-center gap-2 text-gray-800 font-bold mb-2" style={{ fontSize: "14px" }}>
-                        <MapPin size={18} className="text-[#2d5a3d]" />
-                        도착지
-                      </label>
-                      <select
-                        value={arrival}
-                        onChange={(e) => setArrival(e.target.value)}
-                        className="w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-3 font-bold text-gray-900 min-h-[52px]"
-                        style={{ fontSize: "18px" }}
-                      >
-                        {TERMINALS.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={swapTerminals}
-                    className="self-center shrink-0 mt-14 sm:mt-16 w-14 h-14 rounded-full border-2 border-[#2d5a3d] bg-white text-[#2d5a3d] shadow-md hover:bg-emerald-50 active:scale-95"
-                    aria-label="출발지·도착지 바꾸기"
-                  >
-                    <ArrowLeftRight className="mx-auto" size={24} />
-                  </button>
-                </div>
-
-                <div className="mt-4 rounded-xl border-2 border-gray-200 bg-white p-3">
-                  <label className="flex items-center gap-2 text-gray-800 font-bold mb-2" style={{ fontSize: "14px" }}>
-                    <CalendarDays size={18} className="text-[#2d5a3d]" />
-                    가는 날
-                  </label>
-                  <input
-                    type="date"
-                    min={today}
-                    value={travelDate}
-                    onChange={(e) => setTravelDate(e.target.value)}
-                    className="w-full rounded-lg border-2 border-gray-300 px-3 py-3 font-bold text-gray-900 min-h-[52px]"
-                    style={{ fontSize: "18px" }}
-                  />
-                  <p className="mt-2 text-gray-600 font-medium text-sm">{formatDateKorean(travelDate)}</p>
-                </div>
-
+          {/* 인원 선택 */}
+          {[
+            { label: "어른", sub: "만 13세 이상", count: adults, set: setAdults },
+            { label: "청소년", sub: "만 6세~12세 (50% 할인)", count: kids, set: setKids },
+            { label: "경로", sub: "만 65세 이상 (50% 할인)", count: seniors, set: setSeniors },
+          ].map(({ label, sub, count, set }) => (
+            <div key={label} className="flex items-center justify-between py-4 border-b border-gray-100">
+              <div>
+                <p className="font-bold text-gray-900" style={{ fontSize: "17px" }}>{label}</p>
+                <p className="text-gray-400" style={{ fontSize: "13px" }}>{sub}</p>
+              </div>
+              <div className="flex items-center gap-4">
                 <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="mt-5 w-full rounded-xl bg-[#c45c26] text-white font-black py-4 sm:py-5 shadow-lg border-2 border-[#a34a1f] hover:brightness-110 active:scale-[0.99]"
-                  style={{ fontSize: "22px" }}
+                  onClick={() => set(Math.max(label === "어른" ? 1 : 0, count - 1))}
+                  className="w-10 h-10 rounded-full border-2 flex items-center justify-center active:scale-95 transition-all"
+                  style={{ borderColor: "#1A6FE8" }}
                 >
-                  버스 조회
+                  <Minus size={18} style={{ color: "#1A6FE8" }} strokeWidth={3} />
+                </button>
+                <span className="font-bold w-6 text-center text-gray-900" style={{ fontSize: "20px" }}>{count}</span>
+                <button
+                  onClick={() => set(count + 1)}
+                  className="w-10 h-10 rounded-full text-white flex items-center justify-center active:scale-95 transition-all"
+                  style={{ background: "#1A6FE8" }}
+                >
+                  <Plus size={18} className="text-white" strokeWidth={3} />
                 </button>
               </div>
             </div>
+          ))}
 
-            <p className="text-center text-red-700 font-bold text-sm">※ 동전 사용 불가</p>
+          <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
+            <span className="font-bold text-gray-700" style={{ fontSize: "16px" }}>총 인원</span>
+            <span className="font-bold text-gray-900" style={{ fontSize: "18px" }}>{totalPassengers}명</span>
           </div>
-        )}
+        </div>
 
-        {screen === "results" && (
-          <div className="space-y-4">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="inline-flex items-center gap-2 rounded-xl bg-white border-2 border-gray-300 px-4 py-3 font-bold text-gray-800 shadow-sm hover:bg-gray-50"
-              style={{ fontSize: "17px" }}
-            >
-              <ArrowLeft size={22} />
-              이전
-            </button>
+        <div className="p-5 border-t border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-gray-600 font-semibold" style={{ fontSize: "15px" }}>예상 결제 금액</span>
+            <span className="font-black" style={{ fontSize: "22px", color: "#1A6FE8" }}>
+              {totalPrice.toLocaleString()}원
+            </span>
+          </div>
+          <button
+            onClick={() => setScreen("payment")}
+            disabled={totalPassengers === 0}
+            className="w-full text-white rounded-2xl py-5 font-bold active:scale-95 transition-all disabled:opacity-40"
+            style={{ background: "#1A6FE8", fontSize: "20px" }}
+          >
+            다음
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-4 shadow">
-              <p className="font-black text-gray-900" style={{ fontSize: "20px" }}>
-                {departure} → {arrival}
-              </p>
-              <p className="text-gray-600 mt-1 font-semibold" style={{ fontSize: "16px" }}>
-                {formatDateKorean(travelDate)} · 총 {results.length}회
-              </p>
+  // ── PAYMENT ───────────────────────────────────────────────
+  if (screen === "payment" && selectedTrip) {
+    return (
+      <div className="min-h-svh bg-white flex flex-col">
+        <div className="flex items-center px-4 py-4 border-b border-gray-100">
+          <button onClick={() => setScreen("passengers")} className="text-gray-700 mr-3">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-gray-900" style={{ fontSize: "18px" }}>
+            결제
+          </h1>
+          <div style={{ width: 24 }} />
+        </div>
+
+        <div className="flex-1 p-5 space-y-4">
+          {/* 여정 요약 */}
+          <div className="border border-gray-200 rounded-2xl p-5 space-y-3">
+            <p className="font-bold text-gray-900 border-b border-gray-100 pb-3" style={{ fontSize: "16px" }}>
+              예매 정보
+            </p>
+            {[
+              { label: "노선", value: `${departure} → ${arrival}` },
+              { label: "출발일", value: formatDisplay(travelDate) },
+              { label: "출발시각", value: selectedTrip.departureTime },
+              { label: "버스회사", value: selectedTrip.company },
+              { label: "등급", value: selectedTrip.grade },
+              { label: "소요시간", value: selectedTrip.duration },
+              { label: "인원", value: `어른 ${adults}명${kids ? ` / 청소년 ${kids}명` : ""}${seniors ? ` / 경로 ${seniors}명` : ""}` },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between">
+                <span className="text-gray-400" style={{ fontSize: "14px" }}>{label}</span>
+                <span className="font-semibold text-gray-800 text-right" style={{ fontSize: "14px", maxWidth: "60%" }}>{value}</span>
+              </div>
+            ))}
+            <div className="flex justify-between border-t border-gray-100 pt-3 mt-1">
+              <span className="font-bold text-gray-800" style={{ fontSize: "16px" }}>총 결제 금액</span>
+              <span className="font-black" style={{ fontSize: "20px", color: "#1A6FE8" }}>
+                {totalPrice.toLocaleString()}원
+              </span>
             </div>
-
-            <ul className="space-y-3">
-              {results.map((trip) => (
-                <li key={trip.id}>
-                  <button
-                    type="button"
-                    className="w-full text-left bg-white rounded-2xl border-2 border-gray-200 shadow-sm p-4 hover:border-[#2d5a3d]/60 hover:shadow-md active:scale-[0.99] transition-all"
-                    onClick={() =>
-                      alert(
-                        `${trip.company} ${trip.departureTime} 출발편을 선택했습니다.\n(연습: 좌석·결제 단계는 없습니다.)`,
-                      )
-                    }
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span
-                        className={`inline-block rounded px-2 py-0.5 text-xs font-black ${
-                          trip.grade === "프리미엄"
-                            ? "bg-violet-100 text-violet-800"
-                            : trip.grade === "우등"
-                              ? "bg-amber-100 text-amber-900"
-                              : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {trip.grade}
-                      </span>
-                      <span className="text-[#c45c26] font-black" style={{ fontSize: "18px" }}>
-                        {trip.price.toLocaleString()}원
-                      </span>
-                    </div>
-                    <p className="text-gray-800 font-bold mb-2" style={{ fontSize: "16px" }}>
-                      {trip.company}
-                    </p>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-black text-gray-900" style={{ fontSize: "26px" }}>
-                          {trip.departureTime}
-                        </span>
-                        <span className="text-gray-400">—</span>
-                        <span className="font-black text-gray-900" style={{ fontSize: "26px" }}>
-                          {trip.arrivalTime}
-                        </span>
-                      </div>
-                      <ChevronRight className="text-gray-400 shrink-0" size={22} />
-                    </div>
-                    <div className="flex items-center justify-between mt-2 text-sm text-gray-600 font-medium">
-                      <span>소요 {trip.duration}</span>
-                      <span className="text-[#2d5a3d] font-bold">잔여 {trip.seatsLeft}석</span>
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
           </div>
-        )}
-      </main>
-    </div>
-  );
+
+          {/* 결제 수단 */}
+          <div className="space-y-3">
+            <button
+              onClick={() => setScreen("complete")}
+              className="w-full text-white rounded-2xl py-10 flex flex-col items-center gap-3 shadow-md active:scale-95 transition-all"
+              style={{ background: "#1A6FE8" }}
+            >
+              <span style={{ fontSize: "52px" }}>💳</span>
+              <span style={{ fontSize: "22px", fontWeight: "700" }}>카드 결제</span>
+            </button>
+            <button
+              onClick={() => setScreen("complete")}
+              className="w-full bg-green-600 hover:bg-green-700 text-white rounded-2xl py-10 flex flex-col items-center gap-3 shadow-md active:scale-95 transition-all"
+            >
+              <span style={{ fontSize: "52px" }}>💵</span>
+              <span style={{ fontSize: "22px", fontWeight: "700" }}>현금 결제</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── COMPLETE ──────────────────────────────────────────────
+  if (screen === "complete" && selectedTrip) {
+    return (
+      <div className="min-h-svh bg-white flex flex-col">
+        <div className="px-4 py-4 border-b border-gray-100 text-center">
+          <h1 className="font-bold text-gray-900" style={{ fontSize: "18px" }}>예매 완료</h1>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-8 gap-7">
+          <div
+            className="rounded-full w-24 h-24 flex items-center justify-center"
+            style={{ background: "#EBF2FF" }}
+          >
+            <Check size={52} style={{ color: "#1A6FE8" }} strokeWidth={3} />
+          </div>
+
+          <div className="text-center">
+            <p className="font-bold text-gray-900" style={{ fontSize: "24px" }}>예매가 완료되었습니다!</p>
+            <p className="text-gray-400 mt-2" style={{ fontSize: "14px" }}>
+              예매번호: <strong className="text-gray-700">{bookingNum}</strong>
+            </p>
+          </div>
+
+          {/* 승차권 카드 */}
+          <div className="w-full border-2 border-dashed rounded-2xl p-5 space-y-3" style={{ borderColor: "#1A6FE8" }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-xs">출발</p>
+                <p className="font-bold text-gray-900" style={{ fontSize: "16px" }}>{departure}</p>
+              </div>
+              <ArrowLeft size={20} className="text-gray-300 rotate-180" />
+              <div className="text-right">
+                <p className="text-gray-400 text-xs">도착</p>
+                <p className="font-bold text-gray-900" style={{ fontSize: "16px" }}>{arrival}</p>
+              </div>
+            </div>
+            <div className="border-t border-dashed border-gray-200 pt-3 space-y-2">
+              {[
+                { label: "출발일시", value: `${formatDisplay(travelDate)} ${selectedTrip.departureTime}` },
+                { label: "버스", value: `${selectedTrip.company} (${selectedTrip.grade})` },
+                { label: "인원", value: `${totalPassengers}명` },
+                { label: "결제금액", value: `${totalPrice.toLocaleString()}원` },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-gray-400" style={{ fontSize: "13px" }}>{label}</span>
+                  <span className="font-semibold text-gray-800" style={{ fontSize: "13px" }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full space-y-3">
+            <button
+              onClick={() => { setAdults(1); setKids(0); setSeniors(0); setSelectedTrip(null); setScreen("results"); }}
+              className="w-full text-white rounded-2xl py-5 font-bold active:scale-95 transition-all"
+              style={{ background: "#1A6FE8", fontSize: "18px" }}
+            >
+              다른 편 조회
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="w-full bg-gray-100 text-gray-600 rounded-2xl py-5 font-bold active:scale-95 transition-all"
+              style={{ fontSize: "18px" }}
+            >
+              홈으로
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
