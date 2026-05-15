@@ -223,9 +223,10 @@
 
 /* ----- CTA area ----- */
 .splash-cta-area {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
-  padding-top: 14px;
+  gap: 14px;
 }
 
 .splash-cta-start {
@@ -268,7 +269,6 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin-top: auto;
   padding-top: 2px;
 }
 .splash-sponsor-label {
