@@ -1,600 +1,407 @@
-import { useNavigate } from "react-router";
-import { ArrowLeft, Coffee, Home, ShoppingCart, CreditCard, Check, Plus, Minus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
-type OrderType = "dine-in" | "takeout" | null;
-type MenuCategory = "coffee" | "beverage" | "dessert";
-type Size = "small" | "medium" | "large";
-type Temperature = "hot" | "ice";
+type Tab = '추천메뉴' | '커피' | '에이드/주스' | '티' | '디저트';
+type Temp = 'HOT' | 'ICE';
+type OptionsPhase = 'review' | 'stamp' | 'payment';
 
 interface MenuItem {
-  id: string;
+  id: number;
   name: string;
   price: number;
-  category: MenuCategory;
-  image: string;
+  emoji: string;
+  hasTemp: boolean;
+  tabs: Tab[];
 }
 
-interface OrderItem {
+interface CartItem {
   menu: MenuItem;
-  size: Size;
-  temperature: Temperature;
-  quantity: number;
+  temp: Temp | null;
+  qty: number;
 }
 
-const menuItems: MenuItem[] = [
-  { id: "americano", name: "아메리카노", price: 4500, category: "coffee", image: "☕" },
-  { id: "latte", name: "카페라떼", price: 5000, category: "coffee", image: "🥛" },
-  { id: "cappuccino", name: "카푸치노", price: 5000, category: "coffee", image: "☕" },
-  { id: "vanilla-latte", name: "바닐라라떼", price: 5500, category: "coffee", image: "🥛" },
-  { id: "green-tea", name: "녹차", price: 4500, category: "beverage", image: "🍵" },
-  { id: "juice", name: "오렌지주스", price: 5000, category: "beverage", image: "🧃" },
-  { id: "smoothie", name: "딸기스무디", price: 6000, category: "beverage", image: "🥤" },
-  { id: "cake", name: "치즈케이크", price: 6500, category: "dessert", image: "🍰" },
+const MENUS: MenuItem[] = [
+  { id: 1,  name: '아메리카노',   price: 2500, emoji: '☕', hasTemp: true,  tabs: ['추천메뉴', '커피'] },
+  { id: 2,  name: '카페라떼',     price: 3900, emoji: '🥛', hasTemp: true,  tabs: ['추천메뉴', '커피'] },
+  { id: 3,  name: '카페모카',     price: 4500, emoji: '☕', hasTemp: true,  tabs: ['추천메뉴', '커피'] },
+  { id: 4,  name: '자몽에이드',   price: 4500, emoji: '🍊', hasTemp: false, tabs: ['추천메뉴', '에이드/주스'] },
+  { id: 5,  name: '망고에이드',   price: 4500, emoji: '🥭', hasTemp: false, tabs: ['추천메뉴', '에이드/주스'] },
+  { id: 6,  name: '키위주스',     price: 4800, emoji: '🥝', hasTemp: false, tabs: ['추천메뉴', '에이드/주스'] },
+  { id: 7,  name: '페퍼민트',     price: 3500, emoji: '🌿', hasTemp: true,  tabs: ['추천메뉴', '티'] },
+  { id: 8,  name: '캐모마일',     price: 3500, emoji: '🌼', hasTemp: true,  tabs: ['추천메뉴', '티'] },
+  { id: 9,  name: '복숭아티',     price: 3500, emoji: '🍑', hasTemp: true,  tabs: ['추천메뉴', '티'] },
+  { id: 10, name: '생크림케이크', price: 3500, emoji: '🍰', hasTemp: false, tabs: ['추천메뉴', '디저트'] },
+  { id: 11, name: '크루와상',     price: 4000, emoji: '🥐', hasTemp: false, tabs: ['추천메뉴', '디저트'] },
+  { id: 12, name: '와플',         price: 2500, emoji: '🧇', hasTemp: false, tabs: ['추천메뉴', '디저트'] },
 ];
+
+const TABS: Tab[] = ['추천메뉴', '커피', '에이드/주스', '티', '디저트'];
+const PAYMENT_METHODS = ['신용카드', '체크카드', '카카오페이', '네이버페이', '삼성페이', '현금'];
+
+const Y = '#FFCC00';
+const BK = '#111111';
 
 export default function CafePage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [orderType, setOrderType] = useState<OrderType>(null);
-  const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
-  const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
-  const [selectedSize, setSelectedSize] = useState<Size>("medium");
-  const [selectedTemp, setSelectedTemp] = useState<Temperature>("hot");
-  const [cart, setCart] = useState<OrderItem[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | null>(null);
 
-  const resetOrder = () => {
-    setStep(0);
-    setOrderType(null);
-    setSelectedCategory(null);
-    setSelectedMenu(null);
-    setSelectedSize("medium");
-    setSelectedTemp("hot");
-    setCart([]);
-    setPaymentMethod(null);
-  };
+  const [activeTab, setActiveTab] = useState<Tab>('추천메뉴');
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  const [popupMenu, setPopupMenu] = useState<MenuItem | null>(null);
+  const [popupTemp, setPopupTemp] = useState<Temp>('HOT');
+  const [popupQty, setPopupQty] = useState(1);
+
+  const [showOptions, setShowOptions] = useState(false);
+  const [optionsPhase, setOptionsPhase] = useState<OptionsPhase>('review');
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+
+  const [showPayPopup, setShowPayPopup] = useState(false);
+  const [payFull, setPayFull] = useState(false);
+  const [showPayConfirm, setShowPayConfirm] = useState(false);
+  const [showDone, setShowDone] = useState(false);
+
+  const [orderNumber] = useState(() => Math.floor(Math.random() * 900) + 100);
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.menu.price * item.qty, 0);
+  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+  const filteredMenus = MENUS.filter(m => m.tabs.includes(activeTab));
+  const popupPrice = popupMenu ? popupMenu.price * popupQty : 0;
+
+  const openPopup = (menu: MenuItem) => { setPopupMenu(menu); setPopupTemp('HOT'); setPopupQty(1); };
 
   const addToCart = () => {
-    if (selectedMenu) {
-      const newItem: OrderItem = {
-        menu: selectedMenu,
-        size: selectedSize,
-        temperature: selectedTemp,
-        quantity: 1,
-      };
-      setCart([...cart, newItem]);
-      setSelectedMenu(null);
-      setStep(1); // 카테고리 선택으로 돌아가기
-    }
+    if (!popupMenu) return;
+    if (cart.length >= 3) { alert('더이상 장바구니에 담을 수 없습니다.'); return; }
+    setCart(prev => [...prev, { menu: popupMenu, temp: popupMenu.hasTemp ? popupTemp : null, qty: popupQty }]);
+    setPopupMenu(null);
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => {
-      const sizePrice = item.size === "large" ? 500 : item.size === "small" ? -500 : 0;
-      return total + (item.menu.price + sizePrice) * item.quantity;
-    }, 0);
+  const removeFromCart = (i: number) => setCart(prev => prev.filter((_, idx) => idx !== i));
+
+  const updateQty = (i: number, delta: number) =>
+    setCart(prev => prev.map((item, idx) => idx === i ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
+
+  const resetAll = () => {
+    setCart([]); setShowOptions(false); setOptionsPhase('review');
+    setSelectedPayment(null); setShowPayPopup(false); setPayFull(false);
+    setShowPayConfirm(false); setShowDone(false); setActiveTab('추천메뉴');
   };
 
-  const removeFromCart = (index: number) => {
-    setCart(cart.filter((_, i) => i !== index));
+  const handleNext = () => {
+    if (optionsPhase === 'review') setOptionsPhase('stamp');
+    else if (optionsPhase === 'stamp') setOptionsPhase('payment');
+    else if (optionsPhase === 'payment' && selectedPayment) setShowPayPopup(true);
   };
 
-  const getSizeText = (size: Size) => {
-    return size === "small" ? "Small" : size === "medium" ? "Medium" : "Large";
+  const handleBack = () => {
+    if (optionsPhase === 'review') setShowOptions(false);
+    else if (optionsPhase === 'stamp') setOptionsPhase('review');
+    else if (optionsPhase === 'payment') setOptionsPhase('stamp');
   };
 
-  const getTempText = (temp: Temperature) => {
-    return temp === "hot" ? "따뜻하게(HOT)" : "차갑게(ICE)";
-  };
+  const nextDisabled = optionsPhase === 'payment' && !selectedPayment;
 
-  // Step 0: 매장/포장 선택
-  if (step === 0) {
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all mb-6"
-          >
-            <ArrowLeft size={32} strokeWidth={2.5} />
-            <span style={{ fontSize: '24px', fontWeight: '600' }}>뒤로 가기</span>
-          </button>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100svh', background: Y, overflow: 'hidden', fontFamily: '"Apple SD Gothic Neo", "Malgun Gothic", sans-serif', position: 'relative' }}>
 
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <Coffee size={60} className="text-amber-600" strokeWidth={2.5} />
-              <h1 className="text-amber-800" style={{ fontSize: '40px', fontWeight: '700' }}>
-                카페 주문
-              </h1>
-            </div>
+      {/* ── Header ── */}
+      <header style={{ background: Y, display: 'flex', alignItems: 'center', padding: '10px 14px 4px', flexShrink: 0 }}>
+        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 26, padding: 2, lineHeight: 1 }}>🏠</button>
+        <h1 style={{ flex: 1, textAlign: 'center', fontSize: 22, fontWeight: 900, margin: 0, color: BK, letterSpacing: -0.5 }}>진흥원 카페</h1>
+        <div style={{ width: 34 }} />
+      </header>
 
-            <p className="text-center text-gray-700 mb-8" style={{ fontSize: '28px', fontWeight: '600' }}>
-              주문 방식을 선택해주세요
-            </p>
+      {/* ── Tab pills ── */}
+      <div style={{ padding: '4px 10px 10px', display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0 }}>
+        {TABS.map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} style={{
+            borderRadius: 20, padding: '7px 14px',
+            background: activeTab === tab ? BK : '#fff',
+            color: activeTab === tab ? '#fff' : BK,
+            border: `2px solid ${BK}`,
+            fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+          }}>{tab}</button>
+        ))}
+      </div>
 
-            <div className="space-y-4">
-              <button
-                onClick={() => {
-                  setOrderType("dine-in");
-                  setStep(1);
-                }}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-2xl p-8 flex flex-col items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
-              >
-                <Home size={70} strokeWidth={2.5} />
-                <span style={{ fontSize: '32px', fontWeight: '700' }}>매장에서 먹기</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setOrderType("takeout");
-                  setStep(1);
-                }}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-2xl p-8 flex flex-col items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
-              >
-                <ShoppingCart size={70} strokeWidth={2.5} />
-                <span style={{ fontSize: '32px', fontWeight: '700' }}>포장하기</span>
-              </button>
-            </div>
-          </div>
+      {/* ── Menu grid ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 6px 6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+          {filteredMenus.map(menu => (
+            <button key={menu.id} onClick={() => openPopup(menu)} style={{
+              background: '#fff', border: '1px solid #e0e0e0', borderRadius: 4,
+              padding: '14px 6px 12px', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: 4, cursor: 'pointer',
+            }}>
+              <span style={{ fontSize: 44 }}>{menu.emoji}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: BK, textAlign: 'center', lineHeight: 1.3, wordBreak: 'keep-all' }}>{menu.name}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#FF3300' }}>{menu.price.toLocaleString()}원</span>
+            </button>
+          ))}
         </div>
       </div>
-    );
-  }
 
-  // Step 1: 카테고리 선택
-  if (step === 1) {
-    const categories = [
-      { id: "coffee" as MenuCategory, name: "커피", icon: "☕", color: "bg-amber-600" },
-      { id: "beverage" as MenuCategory, name: "음료", icon: "🥤", color: "bg-blue-500" },
-      { id: "dessert" as MenuCategory, name: "디저트", icon: "🍰", color: "bg-pink-500" },
-    ];
+      {/* ── Bottom panel ── */}
+      <div style={{ background: Y, padding: '8px 8px 14px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
 
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-6 gap-2">
-            <button
-              onClick={() => setStep(0)}
-              className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <ArrowLeft size={28} strokeWidth={2.5} />
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>이전</span>
-            </button>
-
-            <button
-              onClick={resetOrder}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>처음으로</span>
-            </button>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <h2 className="text-center text-gray-800 mb-8" style={{ fontSize: '32px', fontWeight: '700' }}>
-              무엇을 주문하시겠어요?
-            </h2>
-
-            <div className="space-y-4 mb-6">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setStep(2);
-                  }}
-                  className={`w-full ${category.color} hover:opacity-90 text-white rounded-2xl p-8 flex items-center justify-center gap-6 shadow-xl active:scale-95 transition-all`}
-                >
-                  <span style={{ fontSize: '60px' }}>{category.icon}</span>
-                  <span style={{ fontSize: '32px', fontWeight: '700' }}>{category.name}</span>
-                </button>
-              ))}
-            </div>
-
-            {cart.length > 0 && (
-              <button
-                onClick={() => setStep(4)}
-                className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-5 flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all"
-              >
-                <ShoppingCart size={32} strokeWidth={2.5} />
-                <span style={{ fontSize: '28px', fontWeight: '700' }}>
-                  장바구니 보기 ({cart.length}개)
-                </span>
-              </button>
+          {/* Left: cart items */}
+          <div style={{ flex: 1, background: '#fff', borderRadius: 6, padding: 10, minHeight: 112, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {cart.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#bbb', fontSize: 13, margin: 0, fontWeight: 600 }}>메뉴를 선택해 주세요</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {cart.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 22 }}>{item.menu.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700 }}>{item.menu.name}</span>
+                      {item.temp && <span style={{ fontSize: 11, color: '#888', marginLeft: 4 }}>({item.temp})</span>}
+                    </div>
+                    <span style={{ fontSize: 11, color: '#555', fontWeight: 700 }}>{item.qty}개</span>
+                    <button onClick={() => removeFromCart(i)} style={{ background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 3, fontSize: 13, width: 20, height: 20, cursor: 'pointer', fontWeight: 700, lineHeight: '20px', padding: 0, textAlign: 'center' }}>×</button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-      </div>
-    );
-  }
 
-  // Step 2: 메뉴 선택
-  if (step === 2 && selectedCategory) {
-    const filteredMenus = menuItems.filter((item) => item.category === selectedCategory);
-
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-6 gap-2">
-            <button
-              onClick={() => setStep(1)}
-              className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <ArrowLeft size={28} strokeWidth={2.5} />
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>이전</span>
-            </button>
-
-            <button
-              onClick={resetOrder}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>처음으로</span>
-            </button>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <h2 className="text-center text-gray-800 mb-8" style={{ fontSize: '32px', fontWeight: '700' }}>
-              메뉴를 선택해주세요
-            </h2>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {filteredMenus.map((menu) => (
-                <button
-                  key={menu.id}
-                  onClick={() => {
-                    setSelectedMenu(menu);
-                    setStep(3);
-                  }}
-                  className="bg-white border-4 border-gray-200 hover:border-amber-500 rounded-xl p-4 flex flex-col items-center gap-3 shadow-lg active:scale-95 transition-all"
-                >
-                  <span style={{ fontSize: '50px' }}>{menu.image}</span>
-                  <span className="text-gray-800 text-center" style={{ fontSize: '20px', fontWeight: '600' }}>
-                    {menu.name}
-                  </span>
-                  <span className="text-amber-600" style={{ fontSize: '22px', fontWeight: '700' }}>
-                    {menu.price.toLocaleString()}원
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {cart.length > 0 && (
-              <button
-                onClick={() => setStep(4)}
-                className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-5 flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all"
-              >
-                <ShoppingCart size={32} strokeWidth={2.5} />
-                <span style={{ fontSize: '28px', fontWeight: '700' }}>
-                  장바구니 보기 ({cart.length}개)
-                </span>
+          {/* Right: info + button */}
+          <div style={{ width: 148, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: BK }}>
+                선택한 상품 <strong>{totalQty}</strong>개
+              </span>
+              <button onClick={resetAll} style={{ background: '#FF3333', color: '#fff', border: 'none', borderRadius: '50%', width: 30, height: 30, fontSize: 9, fontWeight: 700, cursor: 'pointer', lineHeight: 1.2, textAlign: 'center' }}>
+                전체<br />삭제
               </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 3: 옵션 선택
-  if (step === 3 && selectedMenu) {
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-6 gap-2">
+            </div>
+            <div style={{ height: 1, background: 'rgba(0,0,0,0.18)' }} />
             <button
-              onClick={() => {
-                setSelectedMenu(null);
-                setStep(2);
+              onClick={() => { if (cart.length > 0) { setShowOptions(true); setOptionsPhase('review'); } }}
+              style={{
+                flex: 1,
+                background: cart.length > 0 ? '#222' : '#666',
+                color: '#fff', border: 'none', borderRadius: 8,
+                cursor: cart.length > 0 ? 'pointer' : 'default',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                padding: '8px 0',
               }}
-              className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all"
             >
-              <ArrowLeft size={28} strokeWidth={2.5} />
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>이전</span>
-            </button>
-
-            <button
-              onClick={resetOrder}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>처음으로</span>
+              <span style={{ fontSize: 20 }}>🛒</span>
+              <span style={{ fontSize: 15, fontWeight: 900 }}>{totalPrice.toLocaleString()}원</span>
+              <span style={{ fontSize: 13, fontWeight: 700 }}>결제하기</span>
             </button>
           </div>
+        </div>
+      </div>
 
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <div className="text-center mb-8">
-              <span style={{ fontSize: '70px' }}>{selectedMenu.image}</span>
-              <h2 className="text-gray-800 mt-3" style={{ fontSize: '32px', fontWeight: '700' }}>
-                {selectedMenu.name}
-              </h2>
-              <p className="text-amber-600 mt-2" style={{ fontSize: '28px', fontWeight: '700' }}>
-                {selectedMenu.price.toLocaleString()}원
-              </p>
+      {/* ── Menu popup (bottom sheet) ── */}
+      {popupMenu && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'flex-end' }} onClick={() => setPopupMenu(null)}>
+          <div style={{ width: '100%', background: '#fff', borderRadius: '18px 18px 0 0', padding: '24px 20px 32px' }} onClick={e => e.stopPropagation()}>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+              <span style={{ fontSize: 56 }}>{popupMenu.emoji}</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: BK }}>{popupMenu.name}</p>
+                <p style={{ margin: '4px 0 0', fontSize: 17, fontWeight: 700, color: '#FF3300' }}>{popupPrice.toLocaleString()}원</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button onClick={() => setPopupQty(q => Math.max(1, q - 1))} style={{ width: 34, height: 34, borderRadius: '50%', border: `2px solid ${BK}`, background: '#fff', fontSize: 20, fontWeight: 700, cursor: 'pointer', lineHeight: 1 }}>−</button>
+                <span style={{ fontSize: 18, fontWeight: 700, minWidth: 22, textAlign: 'center' }}>{popupQty}</span>
+                <button onClick={() => setPopupQty(q => q + 1)} style={{ width: 34, height: 34, borderRadius: '50%', border: `2px solid ${BK}`, background: '#fff', fontSize: 20, fontWeight: 700, cursor: 'pointer', lineHeight: 1 }}>+</button>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              {/* 사이즈 선택 */}
+            {popupMenu.hasTemp && (
+              <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+                {(['HOT', 'ICE'] as Temp[]).map(t => (
+                  <button key={t} onClick={() => setPopupTemp(t)} style={{
+                    flex: 1, padding: '13px 0', borderRadius: 10, border: '2px solid',
+                    borderColor: popupTemp === t ? (t === 'HOT' ? '#c53030' : '#2b6cb0') : '#e0e0e0',
+                    background: popupTemp === t ? (t === 'HOT' ? '#fff5f5' : '#ebf8ff') : '#fff',
+                    color: popupTemp === t ? (t === 'HOT' ? '#c53030' : '#2b6cb0') : '#999',
+                    fontSize: 17, fontWeight: 700, cursor: 'pointer',
+                  }}>{t}</button>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setPopupMenu(null)} style={{ flex: 1, padding: '15px 0', borderRadius: 10, border: `2px solid ${BK}`, background: '#fff', color: BK, fontSize: 17, fontWeight: 700, cursor: 'pointer' }}>취소</button>
+              <button onClick={addToCart} style={{ flex: 2, padding: '15px 0', borderRadius: 10, border: 'none', background: Y, color: BK, fontSize: 17, fontWeight: 700, cursor: 'pointer' }}>선택완료</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Options panel ── */}
+      {showOptions && (
+        <div style={{ position: 'fixed', inset: 0, background: '#fff', zIndex: 50, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: Y, padding: '14px 16px', flexShrink: 0 }}>
+            <h1 style={{ margin: 0, fontSize: 19, fontWeight: 900, textAlign: 'center', color: BK }}>진흥원 카페</h1>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+
+            {optionsPhase === 'review' && (
               <div>
-                <h3 className="text-gray-800 mb-4" style={{ fontSize: '28px', fontWeight: '600' }}>
-                  사이즈 선택
-                </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {(["small", "medium", "large"] as Size[]).map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`${
-                        selectedSize === size
-                          ? "bg-amber-500 text-white border-amber-600"
-                          : "bg-white text-gray-800 border-gray-300"
-                      } border-4 rounded-xl py-6 transition-all active:scale-95`}
-                    >
-                      <p style={{ fontSize: '24px', fontWeight: '700' }}>
-                        {getSizeText(size)}
-                      </p>
-                      <p style={{ fontSize: '18px', fontWeight: '600' }}>
-                        {size === "small" ? "-500원" : size === "large" ? "+500원" : "기본"}
-                      </p>
-                    </button>
+                <p style={{ fontSize: 17, fontWeight: 700, marginBottom: 14, color: BK }}>주문 내역</p>
+                {cart.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0', borderBottom: '1px solid #eee' }}>
+                    <span style={{ fontSize: 34 }}>{item.menu.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>{item.menu.name}{item.temp ? ` (${item.temp})` : ''}</p>
+                      <p style={{ margin: '2px 0 0', color: '#FF3300', fontSize: 13, fontWeight: 700 }}>{(item.menu.price * item.qty).toLocaleString()}원</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => updateQty(i, -1)} style={{ width: 28, height: 28, borderRadius: '50%', border: `2px solid ${BK}`, background: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>−</button>
+                      <span style={{ fontSize: 15, fontWeight: 700, minWidth: 18, textAlign: 'center' }}>{item.qty}</span>
+                      <button onClick={() => updateQty(i, 1)} style={{ width: 28, height: 28, borderRadius: '50%', border: `2px solid ${BK}`, background: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>+</button>
+                    </div>
+                    <button onClick={() => removeFromCart(i)} style={{ background: '#e53e3e', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>삭제</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {optionsPhase === 'stamp' && (
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 800, background: Y, padding: '4px 12px', borderRadius: 20, display: 'inline-block', marginBottom: 8 }}>Step 1.</span>
+                <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 6, marginTop: 0 }}>적립하시겠습니까?</p>
+                <p style={{ fontSize: 13, color: '#888', marginBottom: 20, lineHeight: 1.5 }}>
+                  회원이시면 [번호조회]를 회원이 아니시면 [회원가입]을 선택해 주시고,<br />
+                  원하지 않으시면 다음으로 이동해주세요.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                  {['번호조회', '회원가입', '건너뛰기'].map(opt => (
+                    <button key={opt} style={{ padding: '22px 4px', borderRadius: 12, border: `2px solid ${BK}`, background: '#fff', color: BK, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>{opt}</button>
+                  ))}
+                </div>
+                <p style={{ marginTop: 14, fontSize: 12, color: '#e53e3e', fontWeight: 600 }}>
+                  ※ 키오스크 연습용입니다. 학습자 정보가 조회되지 않습니다.
+                </p>
+              </div>
+            )}
+
+            {optionsPhase === 'payment' && (
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 800, background: Y, padding: '4px 12px', borderRadius: 20, display: 'inline-block', marginBottom: 8 }}>Step 2.</span>
+                <p style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, marginTop: 0 }}>결제방식을 선택해 주세요!</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  {PAYMENT_METHODS.map(pm => (
+                    <button key={pm} onClick={() => setSelectedPayment(pm)} style={{
+                      padding: '22px 0', borderRadius: 12,
+                      border: `2px solid ${selectedPayment === pm ? BK : '#e0e0e0'}`,
+                      background: selectedPayment === pm ? Y : '#fff',
+                      color: BK, fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                    }}>{pm}</button>
                   ))}
                 </div>
               </div>
-
-              {/* 온도 선택 */}
-              {selectedMenu.category !== "dessert" && (
-                <div>
-                  <h3 className="text-gray-800 mb-4" style={{ fontSize: '28px', fontWeight: '600' }}>
-                    온도 선택
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(["hot", "ice"] as Temperature[]).map((temp) => (
-                      <button
-                        key={temp}
-                        onClick={() => setSelectedTemp(temp)}
-                        className={`${
-                          selectedTemp === temp
-                            ? "bg-amber-500 text-white border-amber-600"
-                            : "bg-white text-gray-800 border-gray-300"
-                        } border-4 rounded-xl py-6 transition-all active:scale-95`}
-                      >
-                        <p style={{ fontSize: '24px', fontWeight: '700' }}>
-                          {getTempText(temp)}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 장바구니 담기 버튼 */}
-              <button
-                onClick={addToCart}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: '28px', fontWeight: '700' }}>장바구니에 담기</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 4: 장바구니 확인
-  if (step === 4) {
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-6 gap-2">
-            <button
-              onClick={() => setStep(1)}
-              className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <ArrowLeft size={28} strokeWidth={2.5} />
-              <span style={{ fontSize: '18px', fontWeight: '600' }}>메뉴 추가</span>
-            </button>
-
-            <button
-              onClick={resetOrder}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>처음으로</span>
-            </button>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <h2 className="text-center text-gray-800 mb-8" style={{ fontSize: '32px', fontWeight: '700' }}>
-              주문 내역 확인
-            </h2>
-
-            {cart.length === 0 ? (
-              <div className="text-center py-12">
-                <ShoppingCart size={60} className="mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500" style={{ fontSize: '24px', fontWeight: '600' }}>
-                  장바구니가 비어있습니다
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4 mb-6">
-                  {cart.map((item, index) => {
-                    const sizePrice = item.size === "large" ? 500 : item.size === "small" ? -500 : 0;
-                    const itemPrice = (item.menu.price + sizePrice) * item.quantity;
-
-                    return (
-                      <div
-                        key={index}
-                        className="bg-amber-50 rounded-xl p-4"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span style={{ fontSize: '40px' }}>{item.menu.image}</span>
-                          <div className="flex-1">
-                            <p className="text-gray-800" style={{ fontSize: '22px', fontWeight: '700' }}>
-                              {item.menu.name}
-                            </p>
-                            <p className="text-gray-600" style={{ fontSize: '18px' }}>
-                              {getSizeText(item.size)} / {getTempText(item.temperature)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-amber-600" style={{ fontSize: '24px', fontWeight: '700' }}>
-                            {itemPrice.toLocaleString()}원
-                          </p>
-                          <button
-                            onClick={() => removeFromCart(index)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg active:scale-95 transition-all"
-                          >
-                            <span style={{ fontSize: '18px', fontWeight: '600' }}>삭제</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="border-t-4 border-gray-300 pt-6 mb-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-800" style={{ fontSize: '28px', fontWeight: '700' }}>
-                      총 결제 금액
-                    </span>
-                    <span className="text-amber-600" style={{ fontSize: '36px', fontWeight: '700' }}>
-                      {getTotalPrice().toLocaleString()}원
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setStep(5)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
-                >
-                  <span style={{ fontSize: '28px', fontWeight: '700' }}>결제하기</span>
-                </button>
-              </>
             )}
           </div>
-        </div>
-      </div>
-    );
-  }
 
-  // Step 5: 결제 수단 선택
-  if (step === 5) {
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-amber-50 to-amber-100 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-6 gap-2">
-            <button
-              onClick={() => setStep(4)}
-              className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl shadow-lg hover:bg-gray-50 active:scale-95 transition-all"
-            >
-              <ArrowLeft size={28} strokeWidth={2.5} />
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>이전</span>
-            </button>
-
-            <button
-              onClick={resetOrder}
-              className="flex items-center gap-2 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: '20px', fontWeight: '600' }}>처음으로</span>
-            </button>
+          {/* Bottom result area */}
+          <div style={{ background: '#f8f8f8', borderTop: '1px solid #e0e0e0', padding: '12px 16px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3, fontSize: 13, color: '#666' }}>
+              <span>주문 금액</span><span style={{ color: '#FF3300', fontWeight: 700 }}>{totalPrice.toLocaleString()}원</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3, fontSize: 13, color: '#666' }}>
+              <span>할인 금액</span><span style={{ color: '#3182ce', fontWeight: 700 }}>0원</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 15, fontWeight: 700 }}>
+              <span>결제 금액</span><span>{totalPrice.toLocaleString()}원</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={resetAll} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: 'none', background: '#e53e3e', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>전체취소</button>
+              <button onClick={handleBack} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: `2px solid ${BK}`, background: '#fff', color: BK, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>이전</button>
+              <button onClick={handleNext} disabled={nextDisabled} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: 'none', background: nextDisabled ? '#ccc' : Y, color: nextDisabled ? '#fff' : BK, fontSize: 14, fontWeight: 700, cursor: nextDisabled ? 'default' : 'pointer' }}>다음</button>
+            </div>
           </div>
+        </div>
+      )}
 
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <h2 className="text-center text-gray-800 mb-6" style={{ fontSize: '32px', fontWeight: '700' }}>
-              결제 수단 선택
-            </h2>
+      {/* ── Pay popup ── */}
+      {showPayPopup && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: '#fff', borderRadius: 18, padding: '24px 20px', width: '100%', maxWidth: 340 }}>
+            <div style={{ background: Y, borderRadius: 10, padding: '6px 16px', marginBottom: 14, display: 'inline-block' }}>
+              <h2 style={{ color: BK, fontSize: 18, fontWeight: 700, margin: 0 }}>카드결제</h2>
+            </div>
+            <p style={{ color: '#666', fontSize: 14, margin: '0 0 16px' }}>결제할 금액을 선택해 주세요.</p>
 
-            <div className="bg-amber-50 rounded-xl p-6 mb-8">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-800" style={{ fontSize: '24px', fontWeight: '700' }}>
-                  총 결제 금액
-                </span>
-                <span className="text-amber-600" style={{ fontSize: '32px', fontWeight: '700' }}>
-                  {getTotalPrice().toLocaleString()}원
-                </span>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ background: '#f5f5f5', borderRadius: 9, padding: '10px 14px', marginBottom: 8 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#888' }}>남은 금액</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 18, fontWeight: 700 }}>{totalPrice.toLocaleString()}원</p>
+                </div>
+                <div style={{ background: '#f5f5f5', borderRadius: 9, padding: '10px 14px' }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#888' }}>결제 금액</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 18, fontWeight: 700, color: payFull ? '#FF3300' : '#bbb' }}>
+                    {payFull ? totalPrice.toLocaleString() : '0'}원
+                  </p>
+                </div>
               </div>
+              <button onClick={() => setPayFull(true)} style={{
+                padding: '0 14px', borderRadius: 9, cursor: 'pointer',
+                border: `2px solid ${payFull ? BK : '#ddd'}`,
+                background: payFull ? Y : '#fff',
+                color: BK, fontSize: 13, fontWeight: 700, lineHeight: 1.4, textAlign: 'center',
+              }}>남은<br />금액<br />전체</button>
             </div>
 
-            <div className="space-y-4">
-              <button
-                onClick={() => {
-                  setPaymentMethod("card");
-                  setStep(6);
-                }}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-2xl p-10 flex flex-col items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
-              >
-                <CreditCard size={70} strokeWidth={2.5} />
-                <span style={{ fontSize: '32px', fontWeight: '700' }}>카드 결제</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setPaymentMethod("cash");
-                  setStep(6);
-                }}
-                className="w-full bg-green-600 hover:bg-green-700 text-white rounded-2xl p-10 flex flex-col items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: '60px' }}>💵</span>
-                <span style={{ fontSize: '32px', fontWeight: '700' }}>현금 결제</span>
-              </button>
+            <p style={{ fontSize: 12, color: '#e53e3e', margin: '0 0 14px' }}>※ 키오스크 연습용입니다. 실제로 결제되지 않습니다.</p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => { setShowPayPopup(false); setPayFull(false); }} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: `2px solid ${BK}`, background: '#fff', color: BK, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>취소</button>
+              <button onClick={() => { if (!payFull) { setPayFull(true); return; } setShowPayPopup(false); setShowPayConfirm(true); }} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: 'none', background: Y, color: BK, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>선택완료</button>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // Step 6: 완료 화면
-  if (step === 6) {
-    return (
-      <div className="min-h-svh bg-gradient-to-b from-green-50 to-green-100 p-4 flex items-center justify-center">
-        <div className="max-w-md mx-auto w-full">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
-            <div className="bg-green-100 rounded-full w-32 h-32 mx-auto mb-6 flex items-center justify-center">
-              <Check size={80} className="text-green-600" strokeWidth={3} />
+      {/* ── Pay confirm popup ── */}
+      {showPayConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: '#fff', borderRadius: 18, padding: '24px 20px', width: '100%', maxWidth: 340, textAlign: 'center' }}>
+            <p style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.6, margin: '0 0 12px' }}>
+              결제 금액 : {totalPrice.toLocaleString()}원<br />
+              결제가 정상적으로 처리되었습니다.
+            </p>
+            <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 14px' }}>영수증을 출력 하시겠습니까?</p>
+            <div style={{ background: '#f5f5f5', borderRadius: 9, padding: '10px 14px', marginBottom: 12, fontSize: 14, color: '#555', textAlign: 'left' }}>
+              예 : 출력&nbsp;&nbsp;/&nbsp;&nbsp;아니오 : 미출력
             </div>
-
-            <h2 className="text-gray-800 mb-6" style={{ fontSize: '36px', fontWeight: '700' }}>
-              주문이 완료되었습니다!
-            </h2>
-
-            <div className="bg-amber-50 rounded-xl p-6 mb-6">
-              <p className="text-gray-700 mb-3" style={{ fontSize: '24px', fontWeight: '600' }}>
-                주문 번호
-              </p>
-              <p className="text-amber-600" style={{ fontSize: '52px', fontWeight: '700' }}>
-                {Math.floor(Math.random() * 900) + 100}
-              </p>
-            </div>
-
-            <div className="bg-blue-50 rounded-xl p-6 mb-8">
-              <p className="text-gray-700 whitespace-pre-line" style={{ fontSize: '22px', fontWeight: '600', lineHeight: '1.6' }}>
-                {orderType === "dine-in"
-                  ? "주문하신 음료는 곧 준비됩니다.\n잠시만 기다려 주세요!"
-                  : "포장 준비가 완료되면 호출하겠습니다.\n감사합니다!"}
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => navigate("/")}
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow-xl active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: '26px', fontWeight: '700' }}>홈으로</span>
-              </button>
-
-              <button
-                onClick={resetOrder}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-xl py-5 shadow-xl active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: '26px', fontWeight: '700' }}>다시 주문하기</span>
-              </button>
+            <p style={{ fontSize: 12, color: '#e53e3e', margin: '0 0 16px' }}>※ 키오스크 연습용입니다. 실제로 결제되지 않습니다.</p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => { setShowPayConfirm(false); setShowDone(true); }} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: 'none', background: Y, color: BK, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>예</button>
+              <button onClick={() => { setShowPayConfirm(false); setShowDone(true); }} style={{ flex: 1, padding: '13px 0', borderRadius: 9, border: `2px solid ${BK}`, background: '#fff', color: BK, fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>아니오</button>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return null;
+      {/* ── Done popup ── */}
+      {showDone && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: '#fff', borderRadius: 18, padding: '28px 20px', width: '100%', maxWidth: 340, textAlign: 'center' }}>
+            <div style={{ background: Y, borderRadius: 12, padding: '10px 20px', marginBottom: 16, display: 'inline-block' }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0, color: BK }}>결제 완료!</h2>
+            </div>
+            <p style={{ fontSize: 14, color: '#666', margin: '0 0 4px' }}>대기번호</p>
+            <p style={{ fontSize: 64, fontWeight: 700, color: BK, margin: '0 0 14px', lineHeight: 1 }}>{orderNumber}</p>
+            <p style={{ fontSize: 13, color: '#666', margin: '0 0 6px' }}>영수증 출력이 완료될 때까지 기다려 주세요.</p>
+            <p style={{ fontSize: 12, color: '#999', lineHeight: 1.5, margin: '0 0 24px' }}>
+              상품제조가 완료되어 대기번호가 호출되면<br />픽업대로 오시기 바랍니다. 감사합니다.
+            </p>
+            <button onClick={() => { resetAll(); navigate('/'); }} style={{ width: '100%', padding: '16px 0', borderRadius: 10, border: 'none', background: Y, color: BK, fontSize: 18, fontWeight: 700, cursor: 'pointer' }}>
+              홈으로
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
