@@ -6,7 +6,7 @@ const menuPages = [
     { id: "cafe", title: "카페", icon: Coffee, color: "bg-amber-600", path: "/cafe" },
     { id: "bank", title: "은행", icon: Building2, color: "bg-blue-600", path: "/bank" },
     { id: "bus", title: "버스 예매", icon: Bus, color: "bg-green-600", path: "/bus" },
-    { id: "ktx", title: "KTX 예매", icon: Train, color: "bg-purple-600", path: "/ktx" },
+    { id: "ktx", title: "코레일톡", icon: Train, color: "bg-sky-600", path: "/ktx" },
   ],
   [
     { id: "public", title: "무인민원발급기", icon: Landmark, color: "bg-red-600", path: "/public" },
