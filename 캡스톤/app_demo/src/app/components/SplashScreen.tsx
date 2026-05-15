@@ -84,7 +84,6 @@ export default function SplashScreen({ onStart }: SplashScreenProps) {
           </button>
 
           <footer className="splash-footer">
-            <span className="splash-sponsor-label">주관</span>
             <img
               className="splash-sponsor-logo"
               src="/jb-logo-cropped.png"
