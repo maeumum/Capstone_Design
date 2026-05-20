@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { Coffee, Building2, Landmark, Train, Bus, UtensilsCrossed, ClipboardList, HelpCircle, Hospital } from "lucide-react";
+import { Coffee, Building2, Landmark, Train, Bus, UtensilsCrossed, ClipboardList, Brain, Hospital } from "lucide-react";
 
 const menuItems = [
   { id: "cafe", title: "카페", icon: Coffee, color: "bg-yellow-600", path: "/cafe" },
@@ -10,7 +10,7 @@ const menuItems = [
   { id: "lotteria", title: "패스트푸드", icon: UtensilsCrossed, color: "bg-orange-600", path: "/lotteria" },
   { id: "table-order", title: "식당 주문", icon: ClipboardList, color: "bg-teal-600", path: "/table-order" },
   { id: "hospital", title: "병원", icon: Hospital, color: "bg-rose-600", path: "/hospital" },
-  { id: "empty", title: "브레인게임", icon: HelpCircle, color: "bg-gray-500", path: "/game" },
+  { id: "empty", title: "브레인게임", icon: Brain, color: "bg-gray-500", path: "/game" },
 ];
 
 export default function Home() {
