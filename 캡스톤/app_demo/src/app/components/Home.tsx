@@ -10,7 +10,7 @@ const menuItems = [
   { id: "lotteria", title: "패스트푸드", icon: UtensilsCrossed, color: "bg-orange-600", path: "/lotteria" },
   { id: "table-order", title: "식당 주문", icon: ClipboardList, color: "bg-teal-600", path: "/table-order" },
   { id: "hospital", title: "병원", icon: Hospital, color: "bg-rose-600", path: "/hospital" },
-  { id: "empty", title: "연습게임", icon: HelpCircle, color: "bg-gray-500", path: "/empty" },
+  { id: "empty", title: "브레인게임", icon: HelpCircle, color: "bg-gray-500", path: "/game" },
 ];
 
 export default function Home() {
