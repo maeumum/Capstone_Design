@@ -22,7 +22,6 @@ export const router = createBrowserRouter([
       { path: "/ktx", Component: KTXPage },
       { path: "/bus", Component: BusPage },
       { path: "/lotteria", Component: LotteriaPage },
-      { path: "/table-order", Component: TableOrderPage },
       { path: "/hospital", Component: HospitalPage },
       { path: "/empty", Component: EmptyPage },
       { path: "/game", Component: GamePage },
@@ -31,5 +30,9 @@ export const router = createBrowserRouter([
   {
     path: "/bank",
     Component: BankPage,
+  },
+  {
+    path: "/table-order",
+    Component: TableOrderPage,
   },
 ]);

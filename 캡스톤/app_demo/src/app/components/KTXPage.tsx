@@ -86,6 +86,20 @@ const EASY_PAY_OPTIONS = [
   { id:"naver", label:"네이버페이", color:"#03C75A", textColor:"#fff" },
 ];
 
+function seededRand(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function shiftTime(time: string, minutes: number): string {
+  const [h, m] = time.split(":").map(Number);
+  let total = ((h * 60 + m + minutes) % 1440 + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2,"0")}:${String(total % 60).padStart(2,"0")}`;
+}
+
 function getOccupiedSeatIds(car: number): Set<string> {
   const occupied = new Set<string>();
   for (let row = 1; row <= SEAT_ROW_COUNT; row++) {
@@ -121,10 +135,19 @@ export default function KTXPage() {
   const canProceedToPayment = selectedSeats.length === form.passengers;
   const availableCountInCar = currentCar.totalSeats - occupiedSeatIds.size - selectedSeats.length;
 
-  const filteredSchedules = baseSchedules.map(train => ({
-    ...train,
-    price: form.departure === "전주" && form.arrival === "용산" ? train.price : Math.round(train.price * 0.8),
-  }));
+  const filteredSchedules = useMemo(() => {
+    const dateSeed = form.travelDate.split("-").reduce((acc, p) => acc * 100 + Number(p), 0);
+    const rand = seededRand(dateSeed);
+    return baseSchedules.map(train => {
+      const offset = Math.round((rand() - 0.5) * 10);
+      return {
+        ...train,
+        departureTime: shiftTime(train.departureTime, offset),
+        arrivalTime: shiftTime(train.arrivalTime, offset),
+        price: form.departure === "전주" && form.arrival === "용산" ? train.price : Math.round(train.price * 0.8),
+      };
+    });
+  }, [form.travelDate, form.departure, form.arrival]);
 
   // ── 카드 결제 자동 진행 ───────────────────────────
   useEffect(() => {
