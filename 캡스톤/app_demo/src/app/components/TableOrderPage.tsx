@@ -16,6 +16,7 @@ interface Choice { n: string; p: number; }
 interface Opt { name: string; required: boolean; choices: Choice[]; }
 interface Item { id: string; name: string; img: string; price: number; badge: string | null; desc: string; options: Opt[]; }
 interface CartLine extends Item { qty: number; opts: Record<string, Choice>; lineTotal: number; }
+interface PastOrder { id: string; time: string; name: string; img: string; qty: number; price: number; status: "served" | "cooking"; }
 
 // ─── Data ─────────────────────────────────────────────────
 const RESTAURANT = { name: "전과한잔", branch: "캠퍼스점", tableNo: "A-7" };
@@ -84,10 +85,10 @@ const ITEMS: Record<string, Item[]> = {
   ],
 };
 
-const PAST_ORDERS = [
-  { id:"o1", time:"19:42", name:"우리쌀 막걸리", img:"/images/makgeolli-uri.jpg",  qty:2, price:14000, status:"served"  as const },
-  { id:"o2", time:"19:42", name:"해물듬뿍파전",  img:"/images/haemul-pajeon.jpg",  qty:1, price:20000, status:"served"  as const },
-  { id:"o3", time:"20:15", name:"도토리묵 무침", img:"/images/dotori-muk.jpg",     qty:1, price:12000, status:"cooking" as const },
+const INITIAL_ORDERS: PastOrder[] = [
+  { id:"o1", time:"19:42", name:"우리쌀 막걸리", img:"/images/makgeolli-uri.jpg", qty:2, price:14000, status:"served"  },
+  { id:"o2", time:"19:42", name:"해물듬뿍파전",  img:"/images/haemul-pajeon.jpg", qty:1, price:20000, status:"served"  },
+  { id:"o3", time:"20:15", name:"도토리묵 무침", img:"/images/dotori-muk.jpg",    qty:1, price:12000, status:"cooking" },
 ];
 
 // ─── Badge ────────────────────────────────────────────────
@@ -257,8 +258,8 @@ function CartModal({ cart, onClose, onUpdateQty, onRemove, onCheckout }:
 }
 
 // ─── OrdersModal ──────────────────────────────────────────
-function OrdersModal({ onClose }: { onClose: () => void }) {
-  const total = PAST_ORDERS.reduce((s, o) => s + o.price * o.qty, 0);
+function OrdersModal({ orders, onClose }: { orders: PastOrder[]; onClose: () => void }) {
+  const total = orders.reduce((s, o) => s + o.price, 0);
   return (
     <div style={{ position:"absolute", inset:0, background:"rgba(22,18,14,0.6)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:50 }}
       onClick={onClose}>
@@ -269,7 +270,7 @@ function OrdersModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} style={{ width:44, height:44, borderRadius:"50%", background:"rgba(0,0,0,0.06)", border:"none", fontSize:20, cursor:"pointer", color:T.ink }}>✕</button>
         </div>
         <div style={{ overflowY:"auto", flex:1 }}>
-          {PAST_ORDERS.map(o => (
+          {orders.map(o => (
             <div key={o.id} style={{ display:"grid", gridTemplateColumns:"64px 1fr auto", gap:18, alignItems:"center", padding:"18px 32px", borderBottom:`1px solid ${T.line}` }}>
               <div style={{ fontFamily:"monospace", fontSize:16, color:T.inkMuted, textAlign:"center" }}>{o.time}</div>
               <div>
@@ -449,6 +450,7 @@ export default function TableOrderPage() {
   const [showCall, setShowCall] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [orders, setOrders] = useState<PastOrder[]>(INITIAL_ORDERS);
   const [bigText, setBigText] = useState(false);
 
   const items = ITEMS[activeCat] || [];
@@ -458,6 +460,23 @@ export default function TableOrderPage() {
   const fs = bigText ? 1.15 : 1;
 
   const addToCart = (line: CartLine) => { setCart(prev => [...prev, line]); setOpenItem(null); };
+
+  const handleCheckoutDone = () => {
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    const newOrders: PastOrder[] = cart.map((line, i) => ({
+      id: `order-${Date.now()}-${i}`,
+      time,
+      name: line.name,
+      img: line.img,
+      qty: line.qty,
+      price: line.lineTotal,
+      status: "cooking",
+    }));
+    setOrders(prev => [...prev, ...newOrders]);
+    setCart([]);
+    setShowCheckout(false);
+  };
   const updateQty = (i: number, q: number) => {
     setCart(prev => {
       const next = [...prev];
@@ -594,13 +613,13 @@ export default function TableOrderPage() {
             onCheckout={() => { setShowCart(false); setShowCheckout(true); }}
           />
         )}
-        {showOrders && <OrdersModal onClose={() => setShowOrders(false)} />}
+        {showOrders && <OrdersModal orders={orders} onClose={() => setShowOrders(false)} />}
         {showCall && <CallStaffModal onClose={() => setShowCall(false)} />}
         {showCheckout && (
           <CheckoutModal
             cart={cart}
             onClose={() => setShowCheckout(false)}
-            onDone={() => { setCart([]); setShowCheckout(false); }}
+            onDone={handleCheckoutDone}
           />
         )}
     </div>
