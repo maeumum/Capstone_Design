@@ -84,9 +84,50 @@ export default function GameListPage() {
             style={{ background: "white", border: "1px solid rgba(42,24,16,0.06)", borderRadius: 24, overflow: "hidden", textAlign: "left", width: "100%", cursor: game.ready ? "pointer" : "default", boxShadow: "0 6px 18px -8px rgba(42,24,16,0.18)", opacity: game.ready ? 1 : 0.75 }}>
 
             {/* 썸네일 */}
-            <div style={{ height: 140, background: `linear-gradient(135deg, ${game.grad[0]}, ${game.grad[1]})`, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ fontSize: 64, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.2))" }}>{game.emoji}</div>
-
+<div style={{ height: 140, background: `linear-gradient(135deg, ${game.grad[0]}, ${game.grad[1]})`, position: "relative", overflow: "hidden" }}>
+  {game.id === "card" ? (
+    // 카드 짝 맞추기 전용 썸네일
+    <>
+      {/* 배경 빛 효과 */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 90% 10%, rgba(255,255,255,0.25), transparent 50%)" }} />
+      {/* 카드들 */}
+      {[
+        { emoji: "🍓", x: 8,  y: 12, rotate: -12, scale: 1.0 },
+        { emoji: "🍊", x: 28, y: 5,  rotate: 6,   scale: 0.85 },
+        { emoji: "🍋", x: 52, y: 10, rotate: -5,  scale: 0.9 },
+        { emoji: "🍇", x: 72, y: 6,  rotate: 10,  scale: 0.85 },
+        { emoji: "🍓", x: 82, y: 18, rotate: -8,  scale: 0.8 },
+        { emoji: "🍊", x: 5,  y: 52, rotate: 8,   scale: 0.85 },
+        { emoji: "🍋", x: 22, y: 58, rotate: -6,  scale: 1.0 },
+        { emoji: "🍇", x: 48, y: 52, rotate: 4,   scale: 0.9 },
+        { emoji: "🥝", x: 68, y: 55, rotate: -10, scale: 0.85 },
+        { emoji: "🍑", x: 85, y: 50, rotate: 7,   scale: 0.9 },
+      ].map((card, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${card.x}%`,
+          top: `${card.y}%`,
+          width: 48 * card.scale,
+          height: 48 * card.scale,
+          borderRadius: 10 * card.scale,
+          background: i % 2 === 0 ? "white" : "linear-gradient(135deg, #FF9A6E, #FF6F5C)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 22 * card.scale,
+          transform: `rotate(${card.rotate}deg)`,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+        }}>
+          {i % 2 === 0 ? card.emoji : "❓"}
+        </div>
+      ))}
+      
+    </>
+  ) : (
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ fontSize: 64, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.2))" }}>{game.emoji}</div>
+    </div>
+  )}
               {/* 태그 */}
               <div style={{ position: "absolute", top: 12, left: 12, fontSize: 10, fontWeight: 800, padding: "5px 9px", borderRadius: 99, background: "rgba(255,255,255,0.95)", color: game.tag === "인기" ? "#FF3B30" : "#9ca3af", boxShadow: "0 4px 10px rgba(0,0,0,0.1)", letterSpacing: "0.3px" }}>
                 {game.tag}

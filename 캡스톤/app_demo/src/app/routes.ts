@@ -10,7 +10,7 @@ import LotteriaPage from "./components/LotteriaPage";
 import TableOrderPage from "./components/TableOrderPage";
 import EmptyPage from "./components/EmptyPage";
 import HospitalPage from "./components/HospitalPage";
-import GamePage from "./components/GamePage";
+import CardGame from "./components/CardGame";
 import GameListPage from "./components/GameListPage";
 
 export const router = createBrowserRouter([
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
       { path: "/hospital", Component: HospitalPage },
       { path: "/empty", Component: EmptyPage },
       { path: "/game", Component: GameListPage },
-      { path: "/game/card", Component: GamePage },
+      { path: "/game/card", Component: CardGame },
     ],
   },
   {
