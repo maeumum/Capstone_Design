@@ -9,11 +9,12 @@ const GAMES = [
     ready: true, tag: "인기",
   },
   {
-    id: "chosung", path: "/game/chosung",
-    title: "초성 게임", category: "언어력",
-    description: "초성을 보고 단어를 맞춰보세요",
-    emoji: "💬", grad: ["#7EB8F7", "#4D96FF"],
-    ready: false, tag: "준비중",
+  id: "chosung", path: "/game/chosung",
+  title: "초성 게임", category: "언어력",
+  description: "초성을 보고 단어를 맞춰보세요",
+  emoji: "💬", grad: ["#7EB8F7", "#4D96FF"],
+  ready: true,  
+  tag: "NEW",
   },
   {
     id: "partial", path: "/game/partial",
@@ -42,7 +43,7 @@ export default function GameListPage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: "100%", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui' }}>
+    <div style={{ minHeight: "100%", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui, sans-serif', overflowY: "auto" }}>
 
       {/* 헤더 */}
       <div style={{ padding: "20px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -123,7 +124,27 @@ export default function GameListPage() {
       ))}
       
     </>
-  ) : (
+  ) : game.id === "chosung" ? (
+    <>
+      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${game.grad[0]}, ${game.grad[1]})` }} />
+      {["ㅅㄱ", "ㅂㄴㄴ", "ㄱㅇㅈ", "ㅎㄹㅇ", "ㅍㅈ", "ㄷㄱ"].map((cho, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${[8, 35, 62, 18, 50, 75][i]}%`,
+          top: `${[15, 8, 18, 55, 52, 48][i]}%`,
+          background: i % 2 === 0 ? "white" : "rgba(255,255,255,0.3)",
+          borderRadius: 12,
+          padding: "6px 12px",
+          fontSize: 16,
+          fontWeight: 900,
+          color: i % 2 === 0 ? "#4D96FF" : "white",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          transform: `rotate(${[-8, 5, -3, 10, -6, 4][i]}deg)`,
+          letterSpacing: "0.2em",
+        }}>{cho}</div>
+      ))}
+    </>
+) : (
     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ fontSize: 64, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.2))" }}>{game.emoji}</div>
     </div>
@@ -156,6 +177,8 @@ export default function GameListPage() {
             </div>
           </button>
         ))}
+
+        
       </div>
     </div>
   );
