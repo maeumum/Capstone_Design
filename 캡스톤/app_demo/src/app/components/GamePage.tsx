@@ -254,7 +254,7 @@ export default function GamePage() {
         )}
 
         <div style={{ padding: "20px 20px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
-          <button onClick={() => navigate("/")} style={{ alignSelf: "flex-start", background: THEME.chipBg, color: THEME.ink, fontWeight: 700, padding: "8px 16px", borderRadius: 99, fontSize: 14, border: "none", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5)", backdropFilter: "blur(14px)" }}>← 뒤로가기</button>
+          <button onClick={() => navigate("/game")} style={{ alignSelf: "flex-start", background: THEME.chipBg, color: THEME.ink, fontWeight: 700, padding: "8px 16px", borderRadius: 99, fontSize: 14, border: "none", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5)", backdropFilter: "blur(14px)" }}>← 뒤로가기</button>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", color: THEME.sub }}>BRAIN GAME</div>
             <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: THEME.ink, marginTop: 2 }}>카드 짝 맞추기 🃏</div>
@@ -277,7 +277,7 @@ export default function GamePage() {
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3 }}>
                     <span style={{ fontSize: 17, fontWeight: 800 }}>{cfg.label}</span>
                     <span style={{ fontSize: 12, opacity: 0.85 }}>
-                      {unlocked ? `카드 ${cfg.pairs*2}장 · ${cfg.timeLimit}초 · 성공 ${displayCount}/${required}` : "이전 레벨을 클리어하면 해금돼요!"}
+                      {unlocked ? `카드 ${cfg.pairs*2}장 · ${cfg.timeLimit}초${cfg.requiredSuccess !== Infinity ? ` · 성공 ${displayCount}/${required}` : ""}` : "이전 레벨을 클리어하면 해금돼요!"}
                     </span>
                   </div>
                 </div>

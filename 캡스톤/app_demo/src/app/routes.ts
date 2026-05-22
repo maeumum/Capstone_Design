@@ -11,6 +11,7 @@ import TableOrderPage from "./components/TableOrderPage";
 import EmptyPage from "./components/EmptyPage";
 import HospitalPage from "./components/HospitalPage";
 import GamePage from "./components/GamePage";
+import GameListPage from "./components/GameListPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +26,8 @@ export const router = createBrowserRouter([
       { path: "/table-order", Component: TableOrderPage },
       { path: "/hospital", Component: HospitalPage },
       { path: "/empty", Component: EmptyPage },
-      { path: "/game", Component: GamePage },
+      { path: "/game", Component: GameListPage },
+      { path: "/game/card", Component: GamePage },
     ],
   },
   {
