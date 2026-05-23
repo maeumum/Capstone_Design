@@ -43,7 +43,7 @@ export default function GameListPage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: "100%", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui, sans-serif'}}>
+    <div style={{ height: "844px", overflowY: "auto", overflowX: "hidden", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui, sans-serif' }}>
 
       {/* 헤더 */}
       <div style={{ padding: "20px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
