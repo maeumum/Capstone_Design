@@ -10,7 +10,7 @@ interface QuizItem {
 }
 
 const CDN = (code: string) =>
-  `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${code}.svg`;
+  `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code.toLowerCase()}.svg`;
 
 const CROP_POSITIONS: CropPos[] = [
   "topLeft","topCenter","topRight",
@@ -78,13 +78,13 @@ const ALL_ITEMS: QuizItem[] = [
   // 탈것 (10개)
   { word:"자동차",    code:"1F697", category:"탈것", difficulty:1 },
   { word:"버스",      code:"1F68C", category:"탈것", difficulty:1 },
-  { word:"비행기",    code:"2708",  category:"탈것", difficulty:2 },
+  { word:"비행기",    code:"2708-FE0F",  category:"탈것", difficulty:2 },
   { word:"자전거",    code:"1F6B2", category:"탈것", difficulty:2 },
   { word:"트럭",      code:"1F69A", category:"탈것", difficulty:2 },
   { word:"기차",      code:"1F686", category:"탈것", difficulty:3 },
   { word:"헬리콥터",  code:"1F681", category:"탈것", difficulty:3 },
   { word:"배",        code:"1F6A2", category:"탈것", difficulty:4 },
-  { word:"오토바이",  code:"1F3CD", category:"탈것", difficulty:4 },
+  { word:"오토바이",  code:"1F3CD-FE0F", category:"탈것", difficulty:4 },
   { word:"로켓",      code:"1F680", category:"탈것", difficulty:5 },
   // 음식 (12개)
   { word:"피자",      code:"1F355", category:"음식", difficulty:1 },
@@ -101,8 +101,8 @@ const ALL_ITEMS: QuizItem[] = [
   { word:"팝콘",      code:"1F37F", category:"음식", difficulty:4 },
   // 자연 (8개)
   { word:"무지개",    code:"1F308", category:"자연", difficulty:2 },
-  { word:"태양",      code:"2600",  category:"자연", difficulty:2 },
-  { word:"구름",      code:"2601",  category:"자연", difficulty:2 },
+  { word:"태양",      code:"2600-FE0F",  category:"자연", difficulty:2 },
+  { word:"구름",      code:"2601-FE0F",  category:"자연", difficulty:2 },
   { word:"번개",      code:"26A1",  category:"자연", difficulty:3 },
   { word:"눈사람",    code:"26C4",  category:"자연", difficulty:3 },
   { word:"화산",      code:"1F30B", category:"자연", difficulty:4 },
@@ -353,7 +353,7 @@ export default function PictureGame() {
           style={{ marginTop:4, padding:"12px 24px", borderRadius:99, background:"linear-gradient(135deg,#ecfdf5,#d1fae5)", color:THEME.accent, fontWeight:700, fontSize:14, border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, alignSelf:"center" }}>
           🔄 레벨 초기화
         </button>
-        <div style={{ textAlign:"center", fontSize:10, color:THEME.sub }}>이미지: OpenMoji (CC BY-SA 4.0)</div>
+        <div style={{ textAlign:"center", fontSize:10, color:THEME.sub }}>이미지: Twemoji (Apache 2.0, Twitter)</div>
       </div>
     </div>
   );

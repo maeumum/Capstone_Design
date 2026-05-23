@@ -170,7 +170,7 @@ export default function GameListPage() {
         background: "white",
       }}>
         <img
-          src={`https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${item.code}.svg`}
+          src={`https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${item.code.toLowerCase()}.svg`}
           style={{ width: 92, height: 92, marginLeft: item.ml, marginTop: item.mt, display: "block" }}
         />
       </div>
@@ -195,7 +195,7 @@ export default function GameListPage() {
       ].map((item, i) => (
         <div key={i} style={{ borderRadius:12, background:"rgba(255,255,255,0.88)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden", boxShadow:"0 2px 8px rgba(0,0,0,0.12)" }}>
           <img
-            src={`https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${item.code}.svg`}
+            src={`https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${item.code.toLowerCase()}.svg`}
             style={{ width:"82%", height:"82%", objectFit:"contain", filter:`blur(${item.blur}px)` }}
           />
         </div>

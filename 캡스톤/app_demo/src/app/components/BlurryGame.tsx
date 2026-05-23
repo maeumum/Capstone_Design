@@ -9,7 +9,7 @@ interface QuizItem {
 }
 
 const CDN = (code: string) =>
-  `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${code}.svg`;
+  `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code.toLowerCase()}.svg`;
 
 const ALL_ITEMS: QuizItem[] = [
   { word:"사과",      code:"1F34E", category:"과일", difficulty:1 },
@@ -48,13 +48,13 @@ const ALL_ITEMS: QuizItem[] = [
   { word:"독수리",    code:"1F985", category:"동물", difficulty:5 },
   { word:"자동차",    code:"1F697", category:"탈것", difficulty:1 },
   { word:"버스",      code:"1F68C", category:"탈것", difficulty:1 },
-  { word:"비행기",    code:"2708",  category:"탈것", difficulty:2 },
+  { word:"비행기",    code:"2708-FE0F",  category:"탈것", difficulty:2 },
   { word:"자전거",    code:"1F6B2", category:"탈것", difficulty:2 },
   { word:"트럭",      code:"1F69A", category:"탈것", difficulty:2 },
   { word:"기차",      code:"1F686", category:"탈것", difficulty:3 },
   { word:"헬리콥터",  code:"1F681", category:"탈것", difficulty:3 },
   { word:"배",        code:"1F6A2", category:"탈것", difficulty:4 },
-  { word:"오토바이",  code:"1F3CD", category:"탈것", difficulty:4 },
+  { word:"오토바이",  code:"1F3CD-FE0F", category:"탈것", difficulty:4 },
   { word:"로켓",      code:"1F680", category:"탈것", difficulty:5 },
   { word:"피자",      code:"1F355", category:"음식", difficulty:1 },
   { word:"햄버거",    code:"1F354", category:"음식", difficulty:1 },
@@ -69,8 +69,8 @@ const ALL_ITEMS: QuizItem[] = [
   { word:"타코",      code:"1F32E", category:"음식", difficulty:4 },
   { word:"팝콘",      code:"1F37F", category:"음식", difficulty:4 },
   { word:"무지개",    code:"1F308", category:"자연", difficulty:2 },
-  { word:"태양",      code:"2600",  category:"자연", difficulty:2 },
-  { word:"구름",      code:"2601",  category:"자연", difficulty:2 },
+  { word:"태양",      code:"2600-FE0F",  category:"자연", difficulty:2 },
+  { word:"구름",      code:"2601-FE0F",  category:"자연", difficulty:2 },
   { word:"번개",      code:"26A1",  category:"자연", difficulty:3 },
   { word:"눈사람",    code:"26C4",  category:"자연", difficulty:3 },
   { word:"화산",      code:"1F30B", category:"자연", difficulty:4 },
@@ -321,7 +321,7 @@ export default function BlurryGame() {
           style={{ marginTop:4, padding:"12px 24px", borderRadius:99, background:"linear-gradient(135deg,#eff6ff,#dbeafe)", color:THEME.accent, fontWeight:700, fontSize:14, border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:8, alignSelf:"center" }}>
           🔄 레벨 초기화
         </button>
-        <div style={{ textAlign:"center", fontSize:10, color:THEME.sub }}>이미지: OpenMoji (CC BY-SA 4.0)</div>
+        <div style={{ textAlign:"center", fontSize:10, color:THEME.sub }}>이미지: Twemoji (Apache 2.0, Twitter)</div>
       </div>
     </div>
   );
