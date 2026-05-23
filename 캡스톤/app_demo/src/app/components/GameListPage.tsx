@@ -6,7 +6,7 @@ const GAMES = [
     title: "카드 짝 맞추기", category: "기억력",
     description: "같은 카드를 찾아 짝을 맞춰보세요",
     emoji: "🃏", grad: ["#FF9A6E", "#FF6F5C"],
-    ready: true, tag: "인기",
+    ready: true, tag: "NEW",
   },
   {
   id: "chosung", path: "/game/chosung",
@@ -28,14 +28,14 @@ const GAMES = [
     title: "흐릿한 그림 맞추기", category: "집중력",
     description: "흐릿한 그림을 보고 정답을 맞춰보세요",
     emoji: "🌫️", grad: ["#C9B8F7", "#9F8AD8"],
-    ready: false, tag: "준비중",
+    ready: true, tag: "NEW",
   },
   {
     id: "color", path: "/game/color",
-    title: "색깔 말하기", category: "순발력",
-    description: "글자 색깔을 빠르게 말해보세요",
+    title: "색깔 맞추기", category: "순발력",
+    description: "글자 색깔을 빠르게 맞춰보세요",
     emoji: "🎨", grad: ["#F8A0B4", "#F25C7A"],
-    ready: false, tag: "준비중",
+    ready: true, tag: "NEW",
   },
 ];
 
@@ -144,7 +144,103 @@ export default function GameListPage() {
         }}>{cho}</div>
       ))}
     </>
-) : (
+) : game.id === "partial" ? (
+  <>
+    <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${game.grad[0]}, ${game.grad[1]})` }} />
+    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 70% 20%, rgba(255,255,255,0.25), transparent 55%)" }} />
+    {[
+      { code: "1F34E", x: 2,  y: 8,  ml: -19, mt: 0,   rotate: -8 },
+      { code: "1F436", x: 23, y: 5,  ml: 0,   mt: -30, rotate: 6  },
+      { code: "1F697", x: 47, y: 9,  ml: -30, mt: 0,   rotate: -4 },
+      { code: "1F355", x: 70, y: 5,  ml: -19, mt: -30, rotate: 9  },
+      { code: "1F34C", x: 5,  y: 52, ml: 0,   mt: -19, rotate: 7  },
+      { code: "1F431", x: 27, y: 55, ml: -30, mt: -30, rotate: -6 },
+      { code: "1F308", x: 51, y: 50, ml: 0,   mt: 0,   rotate: 5  },
+      { code: "1F418", x: 73, y: 52, ml: -19, mt: -19, rotate: -9 },
+    ].map((item, i) => (
+      <div key={i} style={{
+        position: "absolute",
+        left: `${item.x}%`,
+        top: `${item.y}%`,
+        width: 54, height: 54,
+        borderRadius: 16,
+        overflow: "hidden",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
+        transform: `rotate(${item.rotate}deg)`,
+        background: "white",
+      }}>
+        <img
+          src={`https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${item.code}.svg`}
+          style={{ width: 92, height: 92, marginLeft: item.ml, marginTop: item.mt, display: "block" }}
+        />
+      </div>
+    ))}
+  </>
+
+) : game.id === "blurry" ? (
+  <>
+    <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg,${game.grad[0]},${game.grad[1]})` }} />
+
+    {/* 4x2 그리드로 꽉 채우기 */}
+    <div style={{ position:"absolute", inset:6, display:"grid", gridTemplateColumns:"repeat(4,1fr)", gridTemplateRows:"repeat(2,1fr)", gap:6 }}>
+      {[
+        { code:"1F34E", blur:3  },
+        { code:"1F436", blur:10 },
+        { code:"1F697", blur:6  },
+        { code:"1F355", blur:14 },
+        { code:"1F34C", blur:8  },
+        { code:"1F431", blur:4  },
+        { code:"1F308", blur:12 },
+        { code:"1F418", blur:16 },
+      ].map((item, i) => (
+        <div key={i} style={{ borderRadius:12, background:"rgba(255,255,255,0.88)", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden", boxShadow:"0 2px 8px rgba(0,0,0,0.12)" }}>
+          <img
+            src={`https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/${item.code}.svg`}
+            style={{ width:"82%", height:"82%", objectFit:"contain", filter:`blur(${item.blur}px)` }}
+          />
+        </div>
+      ))}
+    </div>
+
+    {/* 가운데 뱃지 */}
+    <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", background:"rgba(159,138,216,0.9)", borderRadius:99, padding:"7px 16px", display:"flex", alignItems:"center", gap:5, boxShadow:"0 4px 16px rgba(0,0,0,0.2)" }}>
+      <span style={{ fontSize:14 }}>🔍</span>
+      <span style={{ color:"white", fontWeight:800, fontSize:12, whiteSpace:"nowrap" }}>맞춰보세요!</span>
+    </div>
+  </>
+) : game.id === "color" ? (
+  <>
+    <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg,${game.grad[0]},${game.grad[1]})` }} />
+    <div style={{ position:"absolute", inset:0, background:"radial-gradient(circle at 70% 20%, rgba(255,255,255,0.2), transparent 55%)" }} />
+    {[
+      { word:"빨강", color:"#ef4444", x:5,  y:6,  rotate:-10, fontSize:22 },
+      { word:"파랑", color:"#3b82f6", x:38, y:4,  rotate:5,   fontSize:20 },
+      { word:"초록", color:"#22c55e", x:68, y:8,  rotate:-6,  fontSize:22 },
+      { word:"노랑", color:"#eab308", x:8,  y:52, rotate:8,   fontSize:20 },
+      { word:"보라", color:"#a855f7", x:40, y:55, rotate:-8,  fontSize:22 },
+      { word:"주황", color:"#f97316", x:70, y:50, rotate:6,   fontSize:20 },
+    ].map((item, i) => (
+      <div key={i} style={{
+        position:"absolute",
+        left:`${item.x}%`,
+        top:`${item.y}%`,
+        background:"rgba(255,255,255,0.92)",
+        borderRadius:14,
+        padding:"6px 14px",
+        boxShadow:"0 4px 14px rgba(0,0,0,0.18)",
+        transform:`rotate(${item.rotate}deg)`,
+      }}>
+        <span style={{ fontSize:item.fontSize, fontWeight:900, color:item.color }}>{item.word}</span>
+      </div>
+    ))}
+
+    {/* 가운데 뱃지 */}
+    <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", background:"rgba(248,160,180,0.9)", borderRadius:99, padding:"7px 16px", display:"flex", alignItems:"center", gap:5, boxShadow:"0 4px 16px rgba(0,0,0,0.2)" }}>
+      <span style={{ fontSize:14 }}>🎨</span>
+      <span style={{ color:"white", fontWeight:800, fontSize:12, whiteSpace:"nowrap" }}>색깔을 맞춰요!</span>
+    </div>
+  </>
+): (
     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ fontSize: 64, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.2))" }}>{game.emoji}</div>
     </div>

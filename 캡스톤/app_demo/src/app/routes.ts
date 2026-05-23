@@ -14,6 +14,8 @@ import CardGame from "./components/CardGame";
 import GameListPage from "./components/GameListPage";
 import ChosungGame from "./components/ChosungGame";
 import PictureGame from "./components/PictureGame";
+import BlurryGame from "./components/BlurryGame";
+import ColorGame from "./components/ColorGame";
 
 
 export const router = createBrowserRouter([
@@ -32,6 +34,8 @@ export const router = createBrowserRouter([
       { path: "/game/card", Component: CardGame },
       { path: "/game/chosung", Component: ChosungGame },
       { path: "/game/partial", Component: PictureGame },
+      { path: "/game/blurry", Component: BlurryGame },
+      { path: "/game/color", Component: ColorGame },
     ],
   },
   {
