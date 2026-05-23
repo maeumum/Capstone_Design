@@ -21,7 +21,7 @@ const GAMES = [
     title: "부분 그림 맞추기", category: "판단력",
     description: "부분만 보고 어떤 그림인지 맞춰보세요",
     emoji: "🖼️", grad: ["#A8D5BA", "#5DBB89"],
-    ready: false, tag: "준비중",
+    ready: true, tag: "NEW",
   },
   {
     id: "blurry", path: "/game/blurry",
@@ -43,7 +43,7 @@ export default function GameListPage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: "100%", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui, sans-serif', overflowY: "auto" }}>
+    <div style={{ minHeight: "100%", background: "linear-gradient(180deg, #FFF1E8 0%, #FFE5D9 100%)", fontFamily: '"Pretendard", -apple-system, system-ui, sans-serif'}}>
 
       {/* 헤더 */}
       <div style={{ padding: "20px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>

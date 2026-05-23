@@ -13,6 +13,7 @@ import HospitalPage from "./components/HospitalPage";
 import CardGame from "./components/CardGame";
 import GameListPage from "./components/GameListPage";
 import ChosungGame from "./components/ChosungGame";
+import PictureGame from "./components/PictureGame";
 
 
 export const router = createBrowserRouter([
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { path: "/game", Component: GameListPage },
       { path: "/game/card", Component: CardGame },
       { path: "/game/chosung", Component: ChosungGame },
+      { path: "/game/partial", Component: PictureGame },
     ],
   },
   {
