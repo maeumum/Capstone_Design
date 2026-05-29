@@ -1,16 +1,37 @@
-
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>demo</title>
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-    </head>
-
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 휴대폰 전용: 줌 방지, 화면 너비에 맞춤 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- iOS 홈 화면 추가 시 전체화면 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>키오스크 연습</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        /* 모바일 주소창 대응 */
+        min-height: 100svh;
+        /* iOS 노치/홈바 안전 영역 */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        /* 텍스트 선택 방지 (앱처럼) */
+        -webkit-user-select: none;
+        user-select: none;
+        /* 더블탭 줌 방지 */
+        touch-action: manipulation;
+        overflow-x: hidden;
+      }
+      #root {
+        height: 100%;
+        min-height: 100svh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

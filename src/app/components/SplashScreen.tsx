@@ -1,4 +1,4 @@
-import { Smartphone } from "lucide-react";
+import "./SplashScreen.css";
 
 interface SplashScreenProps {
   onStart: () => void;
@@ -6,34 +6,92 @@ interface SplashScreenProps {
 
 export default function SplashScreen({ onStart }: SplashScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 flex flex-col items-center justify-center px-6">
-      <div className="text-center space-y-12">
-        <div className="flex justify-center">
-          <div className="bg-white rounded-full p-12 shadow-2xl">
-            <Smartphone size={150} className="text-blue-600" strokeWidth={2.5} />
-          </div>
-        </div>
+    <div className="splash-root">
+      <div className="splash-frame" data-screen-label="00 Splash">
 
-        <div className="space-y-6">
-          <h1 className="text-white" style={{ fontSize: '64px', fontWeight: '800', textShadow: '2px 2px 4px rgba(0,0,0,0.2)' }}>
-            어플 이름 로고 추가
+        <span className="splash-eyebrow">키오스크 연습앱</span>
+
+        <div className="splash-title-block">
+          <h1 className="splash-app-title">
+            처음이라도<br />
+            괜찮아요.
           </h1>
-          <p className="text-blue-100" style={{ fontSize: '36px', fontWeight: '600' }}>
-            전북평생교육진흥원 로고 추가
+          <p className="splash-tagline">
+            실제와 똑같이, 차근차근<br />
+            키오스크 사용을 연습해 봐요.
           </p>
         </div>
 
-        <button
-          onClick={onStart}
-          className="bg-white text-blue-600 px-16 py-8 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 mt-16"
-          style={{ fontSize: '40px', fontWeight: '700' }}
-        >
-          시작하기
-        </button>
+        <div className="splash-hero" aria-label="kiosk illustration">
+          <span className="splash-blob b1" aria-hidden="true"></span>
+          <span className="splash-blob b2" aria-hidden="true"></span>
+          <span className="splash-blob b3" aria-hidden="true"></span>
+          <span className="splash-blob b4" aria-hidden="true"></span>
 
-        <p className="text-blue-100 mt-8" style={{ fontSize: '28px' }}>
-          시작하기 버튼을 눌러서 시작해주세요!
-        </p>
+          <div className="splash-kiosk-card">
+            <div className="splash-topbar" aria-hidden="true">
+              <span className="splash-dot" style={{ background: "#FF5F57" }}></span>
+              <span className="splash-dot" style={{ background: "#FEBC2E" }}></span>
+              <span className="splash-dot" style={{ background: "#28C840" }}></span>
+              <span className="splash-pulse"></span>
+            </div>
+            <h2>&nbsp;연습해 봐요</h2>
+            <span className="splash-sub">PLEASE ORDER</span>
+
+            <div className="splash-menu">
+              <div className="splash-menu-item">
+                <span className="splash-chip" style={{ background: "#E07A11" }} aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 9 H17 V14 a5 5 0 0 1 -5 5 H10 a5 5 0 0 1 -5 -5 Z" />
+                    <path d="M17 10 H20 a3 3 0 0 1 0 6 H17" />
+                  </svg>
+                </span>
+                카페
+              </div>
+              <div className="splash-menu-item splash-active">
+                <span className="splash-chip" style={{ background: "#1F50EE" }} aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M6 7 H18 V19 H6 Z" />
+                    <path d="M6 11 H18" />
+                    <path d="M10 15 H14" />
+                  </svg>
+                </span>
+                은행
+              </div>
+              <div className="splash-menu-item">
+                <span className="splash-chip" style={{ background: "#1F9A45" }} aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 9 a3 3 0 0 1 3 -3 H16 a3 3 0 0 1 3 3 V17 H5 Z" />
+                    <path d="M5 13 H19" />
+                    <circle cx="9" cy="19" r="1.5" />
+                    <circle cx="15" cy="19" r="1.5" />
+                  </svg>
+                </span>
+                교통수단
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="splash-cta-area">
+          <button type="button" className="splash-cta-start" onClick={onStart}>
+            시작하기
+            <span className="splash-arrow-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 12 H19 M13 6 L19 12 L13 18" />
+              </svg>
+            </span>
+          </button>
+
+          <footer className="splash-footer">
+            <img
+              className="splash-sponsor-logo"
+              src="/jb-logo-cropped.png"
+              alt="전북특별자치도 평생교육장학진흥원"
+            />
+          </footer>
+        </div>
+
       </div>
     </div>
   );

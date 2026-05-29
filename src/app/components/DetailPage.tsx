@@ -17,7 +17,7 @@ export function DetailPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+      <div className="min-h-svh bg-gray-50 p-6 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">페이지를 찾을 수 없습니다.</p>
           <button
@@ -34,7 +34,7 @@ export function DetailPage() {
   const Icon = data.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-svh bg-gray-50">
       <div className={`${data.color} text-white p-6`}>
         <button
           onClick={() => navigate("/")}

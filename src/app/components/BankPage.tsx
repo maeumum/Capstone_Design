@@ -1,61 +1,85 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
+import "./BankMain.css";
 
 type Service = "withdrawal" | "balance" | "transfer" | "deposit" | "passbook" | "utility" | null;
 type Step =
-  | "welcome"
-  | "pin"
-  | "service"
-  | "withdrawal-amount"
-  | "transfer-bank"
-  | "transfer-account"
-  | "transfer-amount"
-  | "deposit-insert"
-  | "passbook-insert"
-  | "confirm"
-  | "complete"
-  | "balance-result";
+  | "main" | "warning" | "insert" | "pin"
+  | "withdrawal-amount" | "transfer-bank" | "transfer-account" | "transfer-amount"
+  | "deposit-insert" | "passbook-insert"
+  | "confirm" | "complete" | "balance-result";
 
 const BANKS = [
   "전북은행", "국민은행", "신한은행", "우리은행",
   "하나은행", "농협은행", "기업은행", "카카오뱅크", "토스뱅크",
 ];
-
 const QUICK_AMOUNTS = [50000, 100000, 200000, 300000, 500000, 700000];
+const TRANSFER_AMOUNTS = [10000, 30000, 50000, 100000, 200000, 500000];
 const MOCK_BALANCE = 1245300;
 
-function AtmHeader() {
-  const time = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+// ─── Shared ATM outer wrapper (letterbox approach) ────────────────────────────
+function AtmPage({ children, onHome }: { children: React.ReactNode; onHome?: () => void }) {
   return (
-    <div className="bg-green-800 px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="bg-white rounded-lg px-3 py-1">
-          <span className="text-green-800" style={{ fontSize: "26px", fontWeight: "900" }}>JB</span>
-        </div>
-        <span className="text-white" style={{ fontSize: "22px", fontWeight: "700" }}>전북은행</span>
+    <div style={{
+      height: "100svh",
+      overflow: "hidden",
+      position: "relative",
+      background: "linear-gradient(to bottom, #cfe6f5 0%, #e8f3fa 22%, #ffffff 55%, #ffffff 100%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      paddingTop: "calc((100svh - 59.7vw) / 2)",
+    }}>
+      <div className="atm-screen">
+        <header className="atm-header">
+          <div className="slogan-slot">slogan placeholder</div>
+          <div className="logo-slot">bank logo placeholder</div>
+        </header>
+        {children}
       </div>
-      <span className="text-green-200" style={{ fontSize: "18px" }}>{time}</span>
+      {onHome && (
+        <button onClick={onHome} style={{
+          position: "absolute", bottom: "16px",
+          background: "rgba(40,60,100,0.12)", color: "#2a3a55",
+          border: "1px solid rgba(40,60,100,0.25)", borderRadius: "8px",
+          padding: "7px 24px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
+        }}>← 홈으로</button>
+      )}
     </div>
   );
 }
 
-function Numpad({ onInput }: { onInput: (d: string) => void }) {
-  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "delete"];
+// Body area below the 110px header — 1280 × 690px coordinate space
+// bottom padding 100px reserves room for the cancel bar (90px)
+const body: React.CSSProperties = {
+  position: "absolute",
+  top: 110, left: 0, right: 0, bottom: 0,
+  display: "flex", flexDirection: "column", alignItems: "center",
+  padding: "28px 120px 100px",
+};
+const bodyNoCancelBar: React.CSSProperties = {
+  ...body,
+  padding: "28px 120px 28px",
+};
+
+function AtmNumpad({ onInput }: { onInput: (d: string) => void }) {
+  const keys = ["1","2","3","4","5","6","7","8","9","clear","0","delete"];
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {keys.map((key) => (
-        <button
-          key={key}
-          onClick={() => onInput(key)}
-          className={`rounded-xl py-5 font-bold shadow active:scale-95 transition-all
-            ${key === "clear"
-              ? "bg-red-500 hover:bg-red-600 text-white"
-              : key === "delete"
-              ? "bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-              : "bg-white hover:bg-gray-100 text-gray-900 border-2 border-gray-300"
-            }`}
-          style={{ fontSize: "26px" }}
-        >
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 180px)", gap: 10 }}>
+      {keys.map(key => (
+        <button key={key} onClick={() => onInput(key)} style={{
+          height: 72, borderRadius: 12,
+          border: "2px solid",
+          borderColor: key === "clear" ? "#dc2626" : key === "delete" ? "#d97706" : "#c1c8d4",
+          background:
+            key === "clear" ? "linear-gradient(to bottom, #fca5a5, #ef4444)" :
+            key === "delete" ? "linear-gradient(to bottom, #fde68a, #f59e0b)" :
+            "linear-gradient(to bottom, #f9fafb, #e2e8f0)",
+          color: key === "clear" || key === "delete" ? "#fff" : "#111827",
+          fontSize: 40, fontWeight: 700,
+          cursor: "pointer", fontFamily: "inherit",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.7) inset",
+        }}>
           {key === "clear" ? "취소" : key === "delete" ? "←" : key}
         </button>
       ))}
@@ -63,579 +87,640 @@ function Numpad({ onInput }: { onInput: (d: string) => void }) {
   );
 }
 
-function CancelBar({ onCancel, onBack, backStep }: { onCancel: () => void; onBack?: () => void; backStep?: string }) {
+function AtmCancelBar({
+  onCancel, onBack, onConfirm,
+}: {
+  onCancel: () => void;
+  onBack?: () => void;
+  onConfirm?: { label: string; onClick: () => void };
+}) {
   return (
-    <div className="bg-gray-700 px-6 py-4 flex justify-between items-center">
-      {onBack ? (
-        <button onClick={onBack} className="bg-gray-500 hover:bg-gray-400 text-white px-6 py-3 rounded-xl active:scale-95 transition-all">
-          <span style={{ fontSize: "20px", fontWeight: "600" }}>← 이전</span>
-        </button>
-      ) : <div />}
-      <button onClick={onCancel} className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl active:scale-95 transition-all">
-        <span style={{ fontSize: "20px", fontWeight: "600" }}>취소 / 카드 반환</span>
-      </button>
+    <div style={{
+      position: "absolute", bottom: 0, left: 0, right: 0, height: 90,
+      background: "#374151",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "0 48px", gap: 16,
+    }}>
+      <div>
+        {onBack && (
+          <button onClick={onBack} style={{
+            height: 64, paddingInline: 44, borderRadius: 999,
+            border: "2px solid rgba(255,255,255,0.35)",
+            background: "linear-gradient(to bottom, #9ca3af, #6b7280)",
+            color: "#fff", fontSize: 34, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>← 이전</button>
+        )}
+      </div>
+      <div style={{ display: "flex", gap: 14 }}>
+        {onConfirm && (
+          <button onClick={onConfirm.onClick} style={{
+            height: 64, paddingInline: 44, borderRadius: 999,
+            border: "2px solid rgba(255,255,255,0.35)",
+            background: "linear-gradient(to bottom, #4ade80, #16a34a, #166534)",
+            color: "#fff", fontSize: 34, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>{onConfirm.label}</button>
+        )}
+        <button onClick={onCancel} style={{
+          height: 64, paddingInline: 44, borderRadius: 999,
+          border: "2px solid rgba(255,255,255,0.35)",
+          background: "linear-gradient(to bottom, #fca5a5, #ef4444, #991b1b)",
+          color: "#fff", fontSize: 34, fontWeight: 700,
+          cursor: "pointer", fontFamily: "inherit",
+        }}>취소 / 카드 반환</button>
+      </div>
     </div>
   );
 }
 
+// ─── Page component ───────────────────────────────────────────────────────────
 export default function BankPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("welcome");
-  const [pin, setPin] = useState("");
+  const [step, setStep] = useState<Step>("main");
   const [service, setService] = useState<Service>(null);
+  const [pin, setPin] = useState("");
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
   const [transferBank, setTransferBank] = useState("");
   const [transferAccount, setTransferAccount] = useState("");
-  const [transferAmount, setTransferAmount] = useState("");
+  const [transferAmount, setTransferAmount] = useState(0);
 
   const reset = () => {
-    setStep("welcome");
-    setPin("");
-    setService(null);
-    setWithdrawalAmount(0);
-    setTransferBank("");
-    setTransferAccount("");
-    setTransferAmount("");
+    setStep("main"); setService(null); setPin("");
+    setWithdrawalAmount(0); setTransferBank(""); setTransferAccount(""); setTransferAmount(0);
   };
+
+  const selectService = (svc: Service) => { setService(svc); setStep("warning"); };
 
   const handlePin = (d: string) => {
     if (d === "clear") { setPin(""); return; }
-    if (d === "delete") { setPin((p) => p.slice(0, -1)); return; }
+    if (d === "delete") { setPin(p => p.slice(0, -1)); return; }
     if (pin.length >= 4) return;
     const next = pin + d;
     setPin(next);
-    if (next.length === 4) setTimeout(() => setStep("service"), 400);
+    if (next.length === 4) {
+      setTimeout(() => {
+        if (service === "withdrawal") setStep("withdrawal-amount");
+        else if (service === "balance") setStep("balance-result");
+        else if (service === "transfer") setStep("transfer-bank");
+        else if (service === "deposit") setStep("deposit-insert");
+        else if (service === "passbook") setStep("passbook-insert");
+        else if (service === "utility") setStep("confirm");
+      }, 400);
+    }
   };
 
   const handleAccount = (d: string) => {
     if (d === "clear") { setTransferAccount(""); return; }
-    if (d === "delete") { setTransferAccount((p) => p.slice(0, -1)); return; }
-    if (transferAccount.length < 14) setTransferAccount((p) => p + d);
+    if (d === "delete") { setTransferAccount(p => p.slice(0, -1)); return; }
+    if (transferAccount.length < 14) setTransferAccount(p => p + d);
   };
 
-  const handleTransferAmt = (d: string) => {
-    if (d === "clear") { setTransferAmount(""); return; }
-    if (d === "delete") { setTransferAmount((p) => p.slice(0, -1)); return; }
-    if (transferAmount.length < 8) setTransferAmount((p) => p + d);
-  };
-
-  // ── WELCOME ──────────────────────────────────────────────
-  if (step === "welcome") {
+  // ── MAIN ─────────────────────────────────────────────────────────────────────
+  if (step === "main") {
+    const notReady = () => alert("해당 업무는 준비 중입니다");
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-green-800 mb-1" style={{ fontSize: "20px" }}>안녕하세요</p>
-            <p className="text-green-900" style={{ fontSize: "38px", fontWeight: "700" }}>전북은행 ATM입니다</p>
+      <AtmPage onHome={() => navigate("/")}>
+        <div className="atm-body">
+          <div className="side-col left-col">
+            <div className="btn orange smaller-text two-line" onClick={notReady}>QR코드 거래/휴대폰거래/<br />스마트출금</div>
+            <div className="btn" onClick={() => selectService("withdrawal")}>예금(수표)출금</div>
+            <div className="btn" onClick={() => selectService("balance")}>잔액조회</div>
+            <div className="btn small-text two-line" onClick={() => selectService("transfer")}>송금(계좌이체)<br />/펀드입금예약</div>
+            <div className="btn" onClick={notReady}>신용카드</div>
+            <div className="btn small-text two-line" onClick={notReady}>예금거래<br />기록조회</div>
+            <div className="btn" onClick={notReady}>대출업무</div>
           </div>
-
-          <div className="bg-green-50 border-4 border-green-200 rounded-3xl p-10 w-full max-w-sm text-center">
-            <div className="text-8xl mb-6">💳</div>
-            <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.6" }}>
-              카드를 넣어주세요
-            </p>
-            <p className="text-gray-500 mt-2" style={{ fontSize: "18px" }}>위쪽 카드 투입구에 넣으세요</p>
+          <div className="center-col">
+            <div className="poster-frame" aria-label="poster area" />
+            <div className="info-block">
+              <div className="info-row"><span className="k">기번</span><span className="s">:</span><span className="v">052917</span></div>
+              <div className="info-row"><span className="k">운영시간</span><span className="s">:</span><span className="v" /></div>
+              <div className="info-notes">
+                <div>5만/1만 지급가능</div>
+                <div>5만/1만 입금가능</div>
+              </div>
+            </div>
+            <button className="btn-zoom" type="button">
+              <span className="zoom-icon">+</span>
+              <span className="label-stack">
+                <span>화면확대</span>
+                <span className="label-sub">(저시력고객용)</span>
+              </span>
+            </button>
           </div>
-
-          <button
-            onClick={() => setStep("pin")}
-            className="w-full max-w-sm bg-green-700 hover:bg-green-800 text-white rounded-2xl py-8 shadow-xl active:scale-95 transition-all"
-          >
-            <span style={{ fontSize: "28px", fontWeight: "700" }}>카드 넣기 (시작하기)</span>
-          </button>
+          <div className="side-col right-col">
+            <div className="btn" onClick={() => selectService("deposit")}>입금</div>
+            <div className="btn" onClick={() => selectService("passbook")}>통장정리</div>
+            <div className="btn small-text two-line" onClick={notReady}>자동계좌<br />이체설정</div>
+            <div className="btn smaller-text two-line" onClick={() => selectService("utility")}>지로/공과금/세금/<br />지방세/범칙금</div>
+            <div className="btn small-text two-line" onClick={notReady}>자주쓰는<br />입금계좌관리</div>
+            <div className="btn" onClick={notReady}>무카드/무통장</div>
+            <div className="btn green two-line" onClick={notReady}>ENGLISH<br />日本語/漢語</div>
+          </div>
         </div>
-        <div className="bg-gray-700 px-6 py-4">
-          <button onClick={() => navigate("/")} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-xl active:scale-95 transition-all">
-            <span style={{ fontSize: "20px", fontWeight: "600" }}>← 홈으로</span>
-          </button>
-        </div>
-      </div>
+      </AtmPage>
     );
   }
 
-  // ── PIN ───────────────────────────────────────────────────
+  // ── WARNING ───────────────────────────────────────────────────────────────────
+  if (step === "warning") {
+    return (
+      <AtmPage>
+        <div className="atm-body dialog">
+          <section className="warning-panel">
+            <h1 className="warning-title">
+              <span className="accent">불법 카드복제</span> 관련 유의사항
+            </h1>
+            <div className="warning-body">
+              최근 자동화기기에 카드 복제기를 부착하여 고객 정보 탈취를 시도한<br />
+              사례가 있사오니,{" "}
+              <span className="accent">카드 투입구가 아래 화면과 다른 경우에는</span><br />
+              <span className="accent">사용을 중단하시고 영업점이나 인터폰으로 신고하여 주시기 바랍니다</span>
+            </div>
+            <div className="slot-illus" aria-label="card slot illustration">
+              <div className="slot-shape" />
+              <div className="slot-label">
+                <div className="col"><span className="ko">카드</span><span className="en">Card</span></div>
+                <div className="col"><span className="ko">명세표</span><span className="en">Receipt</span></div>
+                <span className="icon" aria-hidden="true"></span>
+              </div>
+            </div>
+          </section>
+          <div className="action-row">
+            <button type="button" className="action-btn cancel" onClick={() => setStep("main")}>취소</button>
+            <button type="button" className="action-btn confirm" onClick={() => setStep("insert")}>확인</button>
+          </div>
+        </div>
+      </AtmPage>
+    );
+  }
+
+  // ── INSERT (카드 / 통장 삽입) ─────────────────────────────────────────────────
+  if (step === "insert") {
+    return (
+      <AtmPage>
+        <div className="atm-body insert">
+          <section className="insert-panel">
+            <div className="insert-titlebar">
+              <h1>카드 / 통장</h1>
+            </div>
+            <p className="insert-prompt">
+              <span className="accent">카드</span>나{" "}
+              <span className="accent">통장</span>을 넣어 주십시오
+            </p>
+            <div className="illus-row">
+              {/* 통장 */}
+              <div className="illus-side passbook">
+                <div className="slot-bar">
+                  <span className="label">
+                    <span className="ko">통장</span>
+                    <span className="en">Passbook</span>
+                    <span className="ic" aria-hidden="true"></span>
+                  </span>
+                </div>
+                <div className="book" aria-label="passbook being inserted">
+                  <div className="col">
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                  </div>
+                  <div className="col">
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                    <div className="line med"></div>
+                    <div className="line short"></div>
+                  </div>
+                </div>
+              </div>
+              {/* 왼쪽 커넥터 */}
+              <div className="connector left">
+                <svg viewBox="0 0 110 22" preserveAspectRatio="none">
+                  <polyline
+                    points="0,11 90,11 90,4 108,11 90,18 90,11"
+                    fill="rgba(140,160,185,.45)"
+                    stroke="rgba(110,135,165,.6)"
+                    strokeWidth="1"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              {/* ATM 일러스트 */}
+              <div className="atm-illus">
+                <div className="body">
+                  <div className="screen-top">
+                    <div className="brand-tag"></div>
+                  </div>
+                  <div className="screen-bot"></div>
+                  <div className="keypad">
+                    {Array.from({ length: 9 }).map((_, i) => <span key={i}></span>)}
+                  </div>
+                  <div className="slot-detail" aria-hidden="true">
+                    <svg viewBox="0 0 56 40" preserveAspectRatio="none">
+                      <path
+                        d="M6 22 L22 22 L30 14 L50 14"
+                        fill="none"
+                        stroke="#1a1d24"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ring left" aria-hidden="true"></div>
+                  <div className="ring right" aria-hidden="true"></div>
+                </div>
+              </div>
+              {/* 오른쪽 커넥터 */}
+              <div className="connector right">
+                <svg viewBox="0 0 110 22" preserveAspectRatio="none">
+                  <polyline
+                    points="0,11 90,11 90,4 108,11 90,18 90,11"
+                    fill="rgba(140,160,185,.45)"
+                    stroke="rgba(110,135,165,.6)"
+                    strokeWidth="1"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              {/* 카드 슬롯 */}
+              <div className="illus-side cardslot">
+                <div className="slot-bar" aria-hidden="true"></div>
+                <div className="card-back" aria-hidden="true"></div>
+                <div className="card-front">
+                  <span className="ko">카드</span>
+                  <span className="en">Card</span>
+                  <span className="ko"></span>
+                  <span className="en"></span>
+                  <span className="ic" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+          <div className="action-row">
+            <button type="button" className="action-btn cancel" onClick={() => setStep("main")}>취소</button>
+            <button type="button" className="action-btn confirm" onClick={() => setStep("pin")}>삽입 완료</button>
+          </div>
+        </div>
+      </AtmPage>
+    );
+  }
+
+  // ── PIN ───────────────────────────────────────────────────────────────────────
   if (step === "pin") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-6">
-          <div className="text-center py-4">
-            <p className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>비밀번호를 입력하세요</p>
-            <p className="text-gray-500 mt-2" style={{ fontSize: "20px" }}>4자리 숫자를 눌러주세요</p>
-          </div>
-
-          <div className="flex justify-center gap-6 py-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`w-14 h-14 rounded-full border-4 transition-all ${
-                  pin.length > i ? "bg-green-700 border-green-700" : "bg-white border-gray-400"
-                }`}
-              />
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 52, fontWeight: 800, color: "#1a2a4a", marginBottom: 10 }}>비밀번호를 입력하세요</p>
+          <p style={{ fontSize: 34, color: "#6b7280", marginBottom: 20 }}>4자리 숫자를 눌러주세요</p>
+          <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{
+                width: 64, height: 64, borderRadius: "50%",
+                border: `5px solid ${pin.length > i ? "#166534" : "#9ca3af"}`,
+                background: pin.length > i ? "#166534" : "#fff",
+                transition: "all 0.15s",
+              }} />
             ))}
           </div>
-
-          <div className="max-w-xs mx-auto w-full">
-            <Numpad onInput={handlePin} />
-          </div>
-
-          {pin.length === 4 && (
-            <button
-              onClick={() => setStep("service")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "26px", fontWeight: "700" }}>확인</span>
-            </button>
-          )}
+          <AtmNumpad onInput={handlePin} />
         </div>
-        <CancelBar onCancel={reset} />
-      </div>
+        <AtmCancelBar onCancel={reset} />
+      </AtmPage>
     );
   }
 
-  // ── SERVICE SELECTION ─────────────────────────────────────
-  if (step === "service") {
-    const services = [
-      { id: "withdrawal", label: "출금", desc: "현금 찾기", emoji: "💵", color: "bg-blue-600" },
-      { id: "balance", label: "잔액조회", desc: "잔액 확인", emoji: "📊", color: "bg-green-700" },
-      { id: "transfer", label: "이체", desc: "계좌 이체", emoji: "🔄", color: "bg-purple-600" },
-      { id: "deposit", label: "입금", desc: "현금 넣기", emoji: "💰", color: "bg-orange-500" },
-      { id: "passbook", label: "통장정리", desc: "통장 업데이트", emoji: "📔", color: "bg-teal-600" },
-      { id: "utility", label: "공과금납부", desc: "요금 납부", emoji: "🏛️", color: "bg-gray-600" },
-    ];
-
-    const handleService = (id: string) => {
-      setService(id as Service);
-      if (id === "withdrawal") setStep("withdrawal-amount");
-      else if (id === "balance") setStep("balance-result");
-      else if (id === "transfer") setStep("transfer-bank");
-      else if (id === "deposit") setStep("deposit-insert");
-      else if (id === "passbook") setStep("passbook-insert");
-      else if (id === "utility") setStep("confirm");
-    };
-
-    return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-4">
-          <h2 className="text-center text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-            원하시는 업무를 선택하세요
-          </h2>
-          <div className="grid grid-cols-2 gap-4 flex-1">
-            {services.map((svc) => (
-              <button
-                key={svc.id}
-                onClick={() => handleService(svc.id)}
-                className={`${svc.color} hover:opacity-90 text-white rounded-2xl p-6 flex flex-col items-center justify-center gap-3 shadow-xl active:scale-95 transition-all`}
-              >
-                <span style={{ fontSize: "44px" }}>{svc.emoji}</span>
-                <span style={{ fontSize: "24px", fontWeight: "700" }}>{svc.label}</span>
-                <span style={{ fontSize: "17px", opacity: 0.9 }}>{svc.desc}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <CancelBar onCancel={reset} />
-      </div>
-    );
-  }
-
-  // ── WITHDRAWAL AMOUNT ─────────────────────────────────────
+  // ── WITHDRAWAL AMOUNT ─────────────────────────────────────────────────────────
   if (step === "withdrawal-amount") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-5">
-          <h2 className="text-center text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-            출금 금액을 선택하세요
-          </h2>
-          <p className="text-center text-gray-500" style={{ fontSize: "18px" }}>
-            현재 잔액: <strong className="text-green-800">{MOCK_BALANCE.toLocaleString()}원</strong>
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 52, fontWeight: 800, color: "#1a2a4a", marginBottom: 10, alignSelf: "flex-start" }}>출금 금액을 선택하세요</p>
+          <p style={{ fontSize: 34, color: "#374151", marginBottom: 18, alignSelf: "flex-start" }}>
+            현재 잔액: <strong style={{ color: "#166534" }}>{MOCK_BALANCE.toLocaleString()}원</strong>
           </p>
-
-          <div className="grid grid-cols-2 gap-4">
-            {QUICK_AMOUNTS.map((amount) => (
-              <button
-                key={amount}
-                onClick={() => {
-                  setWithdrawalAmount(amount);
-                  setStep("confirm");
-                }}
-                className="bg-white hover:bg-green-50 border-4 border-gray-200 hover:border-green-600 text-gray-800 rounded-2xl py-7 text-center shadow active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: "26px", fontWeight: "700" }}>{amount.toLocaleString()}원</span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, width: "100%", marginBottom: 16 }}>
+            {QUICK_AMOUNTS.map(amount => (
+              <button key={amount} onClick={() => { setWithdrawalAmount(amount); setStep("confirm"); }}
+                style={{
+                  height: 88, borderRadius: 14, cursor: "pointer",
+                  border: "3px solid #d1d5db",
+                  background: "linear-gradient(to bottom, #f9fafb, #e5e7eb)",
+                  fontSize: 40, fontWeight: 700, color: "#111827",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.8) inset",
+                  fontFamily: "inherit",
+                }}>
+                {amount.toLocaleString()}원
               </button>
             ))}
           </div>
-
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5 text-center">
-            <p className="text-blue-700" style={{ fontSize: "20px", fontWeight: "600" }}>
-              💡 다른 금액을 원하시면 직원에게 문의하세요
-            </p>
+          <div style={{
+            width: "100%", padding: "14px 24px",
+            background: "#eff6ff", border: "2px solid #bfdbfe",
+            borderRadius: 12, fontSize: 28, color: "#1d4ed8", fontWeight: 600,
+          }}>
+            💡 다른 금액을 원하시면 직원에게 문의하세요
           </div>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
-      </div>
+        <AtmCancelBar onCancel={reset} onBack={() => setStep("pin")} />
+      </AtmPage>
     );
   }
 
-  // ── BALANCE RESULT ────────────────────────────────────────
+  // ── BALANCE RESULT ────────────────────────────────────────────────────────────
   if (step === "balance-result") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 gap-8">
-          <h2 className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>잔액 조회 결과</h2>
-
-          <div className="w-full max-w-sm bg-green-50 border-4 border-green-200 rounded-2xl p-8 text-center">
-            <p className="text-gray-500 mb-2" style={{ fontSize: "20px" }}>전북은행 (****-**-123456)</p>
-            <p className="text-gray-500 mb-3" style={{ fontSize: "20px" }}>잔액</p>
-            <p className="text-green-800" style={{ fontSize: "46px", fontWeight: "700" }}>
-              {MOCK_BALANCE.toLocaleString()}원
-            </p>
+      <AtmPage onHome={() => navigate("/")}>
+        <div style={{ ...bodyNoCancelBar, justifyContent: "center", alignItems: "center", gap: 28 }}>
+          <p style={{ fontSize: 52, fontWeight: 800, color: "#1a2a4a" }}>잔액 조회 결과</p>
+          <div style={{
+            width: 700, padding: "36px 60px",
+            background: "linear-gradient(to bottom, #f0fdf4, #dcfce7)",
+            border: "3px solid #86efac", borderRadius: 20, textAlign: "center",
+          }}>
+            <p style={{ fontSize: 30, color: "#6b7280", marginBottom: 8 }}>전북은행 (****-**-123456)</p>
+            <p style={{ fontSize: 30, color: "#6b7280", marginBottom: 12 }}>잔액</p>
+            <p style={{ fontSize: 72, fontWeight: 800, color: "#166534" }}>{MOCK_BALANCE.toLocaleString()}원</p>
           </div>
-
-          <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("service")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>다른 업무 보기</span>
-            </button>
-            <button
-              onClick={reset}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>종료 (카드 반환)</span>
-            </button>
-          </div>
+          <button onClick={reset} style={{
+            width: 500, height: 88, borderRadius: 999,
+            background: "linear-gradient(to bottom, #4ade80, #16a34a, #166534)",
+            border: "2px solid rgba(255,255,255,0.4)",
+            color: "#fff", fontSize: 40, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>처음으로 돌아가기</button>
         </div>
-      </div>
+      </AtmPage>
     );
   }
 
-  // ── TRANSFER: BANK ────────────────────────────────────────
+  // ── TRANSFER: BANK ────────────────────────────────────────────────────────────
   if (step === "transfer-bank") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-4">
-          <h2 className="text-center text-gray-800 mb-2" style={{ fontSize: "28px", fontWeight: "700" }}>
-            받는 분의 은행을 선택하세요
-          </h2>
-          <div className="grid grid-cols-3 gap-3 flex-1">
-            {BANKS.map((bank) => (
-              <button
-                key={bank}
-                onClick={() => { setTransferBank(bank); setStep("transfer-account"); }}
-                className={`border-4 rounded-xl p-4 flex items-center justify-center text-center active:scale-95 transition-all shadow
-                  ${transferBank === bank
-                    ? "border-green-600 bg-green-50 text-green-800"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50"
-                  }`}
-              >
-                <span style={{ fontSize: "19px", fontWeight: "600" }}>{bank}</span>
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 52, fontWeight: 800, color: "#1a2a4a", marginBottom: 20, alignSelf: "flex-start" }}>받는 분의 은행을 선택하세요</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, width: "100%" }}>
+            {BANKS.map(bank => (
+              <button key={bank} onClick={() => { setTransferBank(bank); setStep("transfer-account"); }}
+                style={{
+                  height: 82, borderRadius: 14, cursor: "pointer",
+                  border: `3px solid ${transferBank === bank ? "#166534" : "#d1d5db"}`,
+                  background: transferBank === bank
+                    ? "linear-gradient(to bottom, #bbf7d0, #4ade80)"
+                    : "linear-gradient(to bottom, #f9fafb, #e5e7eb)",
+                  fontSize: 34, fontWeight: 700,
+                  color: transferBank === bank ? "#166534" : "#111827",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.8) inset",
+                  fontFamily: "inherit",
+                }}>
+                {bank}
               </button>
             ))}
           </div>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
-      </div>
+        <AtmCancelBar onCancel={reset} onBack={() => setStep("pin")} />
+      </AtmPage>
     );
   }
 
-  // ── TRANSFER: ACCOUNT NUMBER ──────────────────────────────
+  // ── TRANSFER: ACCOUNT NUMBER ──────────────────────────────────────────────────
   if (step === "transfer-account") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-5">
-          <div className="text-center">
-            <h2 className="text-gray-800" style={{ fontSize: "28px", fontWeight: "700" }}>
-              계좌번호를 입력하세요
-            </h2>
-            <p className="text-green-700 mt-1" style={{ fontSize: "20px", fontWeight: "600" }}>
-              선택된 은행: {transferBank}
-            </p>
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 48, fontWeight: 800, color: "#1a2a4a", marginBottom: 8, alignSelf: "flex-start" }}>계좌번호를 입력하세요</p>
+          <p style={{ fontSize: 30, color: "#166534", fontWeight: 700, marginBottom: 12, alignSelf: "flex-start" }}>선택된 은행: {transferBank}</p>
+          <div style={{
+            width: "100%", height: 84, marginBottom: 14,
+            background: "#f1f5f9", border: "3px solid #cbd5e1", borderRadius: 12,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 46, fontWeight: 700, color: "#111827", letterSpacing: "0.08em",
+          }}>
+            {transferAccount || "─ ─ ─ ─ ─ ─ ─ ─"}
           </div>
-
-          <div className="bg-gray-100 border-2 border-gray-300 rounded-xl p-5 text-center min-h-[70px] flex items-center justify-center">
-            <span className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700", letterSpacing: "0.1em" }}>
-              {transferAccount || "─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─"}
-            </span>
-          </div>
-
-          <div className="max-w-xs mx-auto w-full">
-            <Numpad onInput={handleAccount} />
-          </div>
-
-          {transferAccount.length >= 10 && (
-            <button
-              onClick={() => setStep("transfer-amount")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>다음 →</span>
-            </button>
-          )}
+          <AtmNumpad onInput={handleAccount} />
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("transfer-bank")} />
-      </div>
+        <AtmCancelBar
+          onCancel={reset}
+          onBack={() => setStep("transfer-bank")}
+          onConfirm={transferAccount.length >= 10
+            ? { label: "다음 →", onClick: () => setStep("transfer-amount") }
+            : undefined}
+        />
+      </AtmPage>
     );
   }
 
-  // ── TRANSFER: AMOUNT ──────────────────────────────────────
+  // ── TRANSFER: AMOUNT ──────────────────────────────────────────────────────────
   if (step === "transfer-amount") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col p-6 gap-5">
-          <h2 className="text-center text-gray-800" style={{ fontSize: "28px", fontWeight: "700" }}>
-            이체할 금액을 입력하세요
-          </h2>
-
-          <div className="bg-gray-100 border-2 border-gray-300 rounded-xl p-5 text-right min-h-[70px] flex items-center justify-end">
-            <span className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-              {transferAmount ? Number(transferAmount).toLocaleString() + "원" : "0원"}
-            </span>
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 48, fontWeight: 800, color: "#1a2a4a", marginBottom: 14, alignSelf: "flex-start" }}>이체할 금액을 선택하세요</p>
+          <div style={{
+            width: "100%", height: 84, marginBottom: 14,
+            background: "#f1f5f9", border: "3px solid #cbd5e1", borderRadius: 12,
+            display: "flex", alignItems: "center", justifyContent: "flex-end",
+            padding: "0 32px",
+            fontSize: 50, fontWeight: 700, color: "#111827",
+          }}>
+            {transferAmount > 0 ? `${transferAmount.toLocaleString()}원` : "0원"}
           </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {[10000, 30000, 50000, 100000, 200000, 500000].map((amt) => (
-              <button
-                key={amt}
-                onClick={() => setTransferAmount(String(amt))}
-                className="bg-white border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 text-gray-700 rounded-xl py-4 text-center active:scale-95 transition-all"
-              >
-                <span style={{ fontSize: "19px", fontWeight: "600" }}>
-                  {amt >= 10000 ? `${amt / 10000}만원` : `${amt}원`}
-                </span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, width: "100%", marginBottom: 14 }}>
+            {TRANSFER_AMOUNTS.map(amt => (
+              <button key={amt} onClick={() => setTransferAmount(amt)}
+                style={{
+                  height: 76, borderRadius: 14, cursor: "pointer",
+                  border: `3px solid ${transferAmount === amt ? "#166534" : "#d1d5db"}`,
+                  background: transferAmount === amt
+                    ? "linear-gradient(to bottom, #bbf7d0, #4ade80)"
+                    : "linear-gradient(to bottom, #f9fafb, #e5e7eb)",
+                  fontSize: 36, fontWeight: 700,
+                  color: transferAmount === amt ? "#166534" : "#111827",
+                  fontFamily: "inherit",
+                }}>
+                {amt >= 10000 ? `${amt / 10000}만원` : `${amt}원`}
               </button>
             ))}
           </div>
-
-          <div className="max-w-xs mx-auto w-full">
-            <Numpad onInput={handleTransferAmt} />
-          </div>
-
-          {transferAmount && Number(transferAmount) > 0 && (
-            <button
-              onClick={() => setStep("confirm")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>다음 →</span>
-            </button>
+          {transferAmount > 0 && (
+            <button onClick={() => setStep("confirm")} style={{
+              width: "100%", height: 76, borderRadius: 999,
+              background: "linear-gradient(to bottom, #4ade80, #16a34a, #166534)",
+              border: "2px solid rgba(255,255,255,0.4)",
+              color: "#fff", fontSize: 38, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit",
+            }}>다음 →</button>
           )}
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("transfer-account")} />
-      </div>
+        <AtmCancelBar onCancel={reset} onBack={() => setStep("transfer-account")} />
+      </AtmPage>
     );
   }
 
-  // ── DEPOSIT INSERT ────────────────────────────────────────
+  // ── DEPOSIT INSERT ────────────────────────────────────────────────────────────
   if (step === "deposit-insert") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>입금</p>
-          </div>
-          <div className="bg-orange-50 border-4 border-orange-200 rounded-3xl p-10 w-full max-w-sm text-center">
-            <div className="text-7xl mb-5">💵</div>
-            <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.7" }}>
-              현금을 투입구에<br />넣어주세요
-            </p>
-          </div>
-          <button
-            onClick={() => setStep("complete")}
-            className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all"
-          >
-            <span style={{ fontSize: "26px", fontWeight: "700" }}>현금 넣기 완료</span>
-          </button>
+      <AtmPage>
+        <div style={{ ...bodyNoCancelBar, justifyContent: "center", alignItems: "center", gap: 28 }}>
+          <div style={{
+            width: 180, height: 180, borderRadius: "50%",
+            background: "linear-gradient(to bottom, #fed7aa, #f97316)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 90, boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+          }}>💵</div>
+          <p style={{ fontSize: 52, fontWeight: 700, color: "#1a2a4a", textAlign: "center", lineHeight: 1.6 }}>
+            현금을 투입구에<br />넣어주세요
+          </p>
+          <button onClick={() => setStep("complete")} style={{
+            height: 90, paddingInline: 80, borderRadius: 999,
+            background: "linear-gradient(to bottom, #fdba74, #f97316, #c2410c)",
+            border: "2px solid rgba(255,255,255,0.4)",
+            color: "#fff", fontSize: 42, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>현금 넣기 완료</button>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
-      </div>
+        <AtmCancelBar onCancel={reset} onBack={() => setStep("pin")} />
+      </AtmPage>
     );
   }
 
-  // ── PASSBOOK INSERT ───────────────────────────────────────
+  // ── PASSBOOK INSERT ───────────────────────────────────────────────────────────
   if (step === "passbook-insert") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center gap-10 p-8">
-          <div className="text-center">
-            <p className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>통장정리</p>
-          </div>
-          <div className="bg-teal-50 border-4 border-teal-200 rounded-3xl p-10 w-full max-w-sm text-center">
-            <div className="text-7xl mb-5">📔</div>
-            <p className="text-gray-700" style={{ fontSize: "26px", fontWeight: "600", lineHeight: "1.7" }}>
-              통장을 투입구에<br />넣어주세요
-            </p>
-          </div>
-          <button
-            onClick={() => setStep("complete")}
-            className="w-full max-w-sm bg-teal-600 hover:bg-teal-700 text-white rounded-2xl py-7 shadow-xl active:scale-95 transition-all"
-          >
-            <span style={{ fontSize: "26px", fontWeight: "700" }}>통장 넣기 완료</span>
-          </button>
+      <AtmPage>
+        <div style={{ ...bodyNoCancelBar, justifyContent: "center", alignItems: "center", gap: 28 }}>
+          <div style={{
+            width: 180, height: 180, borderRadius: "50%",
+            background: "linear-gradient(to bottom, #99f6e4, #0d9488)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 90, boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+          }}>📔</div>
+          <p style={{ fontSize: 52, fontWeight: 700, color: "#1a2a4a", textAlign: "center", lineHeight: 1.6 }}>
+            통장을 투입구에<br />넣어주세요
+          </p>
+          <button onClick={() => setStep("complete")} style={{
+            height: 90, paddingInline: 80, borderRadius: 999,
+            background: "linear-gradient(to bottom, #5eead4, #0d9488, #115e59)",
+            border: "2px solid rgba(255,255,255,0.4)",
+            color: "#fff", fontSize: 42, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>통장 넣기 완료</button>
         </div>
-        <CancelBar onCancel={reset} onBack={() => setStep("service")} />
-      </div>
+        <AtmCancelBar onCancel={reset} onBack={() => setStep("pin")} />
+      </AtmPage>
     );
   }
 
-  // ── CONFIRM ───────────────────────────────────────────────
+  // ── CONFIRM ───────────────────────────────────────────────────────────────────
   if (step === "confirm") {
     const serviceLabel: Record<string, string> = {
       withdrawal: "출금", transfer: "이체", deposit: "입금",
       passbook: "통장정리", utility: "공과금납부",
     };
-
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 gap-8">
-          <h2 className="text-gray-800" style={{ fontSize: "30px", fontWeight: "700" }}>
-            거래 내역을 확인하세요
-          </h2>
-
-          <div className="w-full max-w-sm bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b-2 border-gray-200">
-              <span className="text-gray-600" style={{ fontSize: "21px" }}>업무 종류</span>
-              <span className="text-gray-900" style={{ fontSize: "21px", fontWeight: "700" }}>
-                {serviceLabel[service ?? ""] ?? ""}
-              </span>
+      <AtmPage>
+        <div style={body}>
+          <p style={{ fontSize: 52, fontWeight: 800, color: "#1a2a4a", marginBottom: 18, alignSelf: "flex-start" }}>거래 내역을 확인하세요</p>
+          <div style={{
+            width: "100%", padding: "22px 40px", marginBottom: 18,
+            background: "#f8fafc", border: "3px solid #e2e8f0", borderRadius: 16,
+          }}>
+            <div style={{
+              display: "flex", justifyContent: "space-between",
+              paddingBottom: 14, borderBottom: "2px solid #e2e8f0", marginBottom: 14,
+            }}>
+              <span style={{ fontSize: 34, color: "#6b7280" }}>업무 종류</span>
+              <span style={{ fontSize: 34, fontWeight: 700, color: "#111827" }}>{serviceLabel[service ?? ""] ?? ""}</span>
             </div>
-
             {service === "withdrawal" && (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600" style={{ fontSize: "21px" }}>출금 금액</span>
-                <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>
-                  {withdrawalAmount.toLocaleString()}원
-                </span>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 34, color: "#6b7280" }}>출금 금액</span>
+                <span style={{ fontSize: 42, fontWeight: 800, color: "#166534" }}>{withdrawalAmount.toLocaleString()}원</span>
               </div>
             )}
-
-            {service === "transfer" && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600" style={{ fontSize: "21px" }}>받는 은행</span>
-                  <span className="text-gray-900" style={{ fontSize: "21px", fontWeight: "600" }}>{transferBank}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600" style={{ fontSize: "21px" }}>계좌번호</span>
-                  <span className="text-gray-900" style={{ fontSize: "21px", fontWeight: "600" }}>{transferAccount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600" style={{ fontSize: "21px" }}>이체 금액</span>
-                  <span className="text-green-800" style={{ fontSize: "25px", fontWeight: "700" }}>
-                    {Number(transferAmount).toLocaleString()}원
-                  </span>
-                </div>
-              </>
-            )}
-
+            {service === "transfer" && (<>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ fontSize: 34, color: "#6b7280" }}>받는 은행</span>
+                <span style={{ fontSize: 34, fontWeight: 700 }}>{transferBank}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ fontSize: 34, color: "#6b7280" }}>계좌번호</span>
+                <span style={{ fontSize: 34, fontWeight: 700 }}>{transferAccount}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 34, color: "#6b7280" }}>이체 금액</span>
+                <span style={{ fontSize: 42, fontWeight: 800, color: "#166534" }}>{transferAmount.toLocaleString()}원</span>
+              </div>
+            </>)}
             {service === "utility" && (
-              <div className="text-center py-2">
-                <p className="text-gray-600" style={{ fontSize: "21px" }}>공과금 청구서를 넣어주세요</p>
-              </div>
+              <p style={{ fontSize: 34, color: "#6b7280", textAlign: "center" }}>공과금 청구서를 넣어주세요</p>
             )}
           </div>
-
-          <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("complete")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-6 shadow-xl active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "26px", fontWeight: "700" }}>확인 (거래 진행)</span>
-            </button>
-            <button
-              onClick={() => {
-                if (service === "withdrawal") setStep("withdrawal-amount");
-                else if (service === "transfer") setStep("transfer-amount");
-                else setStep("service");
-              }}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>← 이전</span>
-            </button>
+          <div style={{ display: "flex", gap: 14, width: "100%" }}>
+            <button onClick={() => {
+              if (service === "withdrawal") setStep("withdrawal-amount");
+              else if (service === "transfer") setStep("transfer-amount");
+              else setStep("pin");
+            }} style={{
+              flex: 1, height: 84, borderRadius: 999,
+              background: "linear-gradient(to bottom, #9ca3af, #6b7280)",
+              border: "2px solid rgba(255,255,255,0.35)",
+              color: "#fff", fontSize: 34, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit",
+            }}>← 이전</button>
+            <button onClick={() => setStep("complete")} style={{
+              flex: 2, height: 84, borderRadius: 999,
+              background: "linear-gradient(to bottom, #4ade80, #16a34a, #166534)",
+              border: "2px solid rgba(255,255,255,0.4)",
+              color: "#fff", fontSize: 38, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit",
+            }}>확인 (거래 진행)</button>
           </div>
         </div>
-        <div className="bg-gray-700 px-6 py-4">
-          <button onClick={reset} className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl active:scale-95 transition-all">
-            <span style={{ fontSize: "20px", fontWeight: "600" }}>취소 / 카드 반환</span>
-          </button>
-        </div>
-      </div>
+        <AtmCancelBar onCancel={reset} />
+      </AtmPage>
     );
   }
 
-  // ── COMPLETE ──────────────────────────────────────────────
+  // ── COMPLETE ──────────────────────────────────────────────────────────────────
   if (step === "complete") {
     return (
-      <div className="min-h-screen bg-gray-800 flex flex-col">
-        <AtmHeader />
-        <div className="flex-1 bg-white flex flex-col items-center justify-center p-8 gap-8">
-          <div className="bg-green-100 rounded-full w-32 h-32 flex items-center justify-center">
-            <span style={{ fontSize: "62px" }}>✓</span>
+      <AtmPage onHome={() => navigate("/")}>
+        <div style={{ ...bodyNoCancelBar, justifyContent: "center", alignItems: "center", gap: 18 }}>
+          <div style={{
+            width: 140, height: 140, borderRadius: "50%",
+            background: "linear-gradient(to bottom, #bbf7d0, #4ade80)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 80, boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          }}>✓</div>
+          <p style={{ fontSize: 58, fontWeight: 800, color: "#166534" }}>거래가 완료되었습니다</p>
+          {service === "withdrawal" && <p style={{ fontSize: 38, color: "#374151" }}>현금 {withdrawalAmount.toLocaleString()}원을 가져가세요</p>}
+          {service === "transfer" && <p style={{ fontSize: 38, color: "#374151" }}>{transferAmount.toLocaleString()}원이 이체되었습니다</p>}
+          {service === "deposit" && <p style={{ fontSize: 38, color: "#374151" }}>입금이 완료되었습니다</p>}
+          {service === "passbook" && <p style={{ fontSize: 38, color: "#374151" }}>통장정리가 완료되었습니다</p>}
+          <div style={{
+            width: "80%", padding: "14px 28px",
+            background: "#fefce8", border: "3px solid #fde68a",
+            borderRadius: 14, fontSize: 34, color: "#854d0e", fontWeight: 600, textAlign: "center",
+          }}>
+            {service === "withdrawal" ? "💵 현금과 카드를 꼭 챙겨가세요!" :
+              service === "passbook" ? "📔 통장과 카드를 꼭 챙겨가세요!" :
+              "💳 카드를 꼭 챙겨가세요!"}
           </div>
-
-          <div className="text-center">
-            <h2 className="text-green-800" style={{ fontSize: "34px", fontWeight: "700" }}>
-              거래가 완료되었습니다
-            </h2>
-            {service === "withdrawal" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>
-                현금 {withdrawalAmount.toLocaleString()}원을 가져가세요
-              </p>
-            )}
-            {service === "transfer" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>
-                {Number(transferAmount).toLocaleString()}원이 이체되었습니다
-              </p>
-            )}
-            {service === "deposit" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>입금이 완료되었습니다</p>
-            )}
-            {service === "passbook" && (
-              <p className="text-gray-600 mt-4" style={{ fontSize: "22px" }}>통장정리가 완료되었습니다</p>
-            )}
-          </div>
-
-          <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-5 w-full max-w-sm text-center">
-            <p className="text-yellow-800" style={{ fontSize: "20px", fontWeight: "600" }}>
-              {service === "withdrawal"
-                ? "💵 현금과 카드를 꼭 챙겨가세요!"
-                : service === "passbook"
-                ? "📔 통장과 카드를 꼭 챙겨가세요!"
-                : "💳 카드를 꼭 챙겨가세요!"}
-            </p>
-          </div>
-
-          <div className="w-full max-w-sm space-y-4">
-            <button
-              onClick={() => setStep("service")}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>다른 업무 보기</span>
-            </button>
-            <button
-              onClick={reset}
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>종료 (카드 반환)</span>
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-xl py-5 shadow active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "22px", fontWeight: "700" }}>홈으로</span>
-            </button>
-          </div>
+          <button onClick={reset} style={{
+            width: 500, height: 86, borderRadius: 999,
+            background: "linear-gradient(to bottom, #4ade80, #16a34a, #166534)",
+            border: "2px solid rgba(255,255,255,0.4)",
+            color: "#fff", fontSize: 38, fontWeight: 700,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>처음으로 돌아가기</button>
         </div>
-      </div>
+      </AtmPage>
     );
   }
 

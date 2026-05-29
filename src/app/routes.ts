@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router";
+import PhoneFrame from "./components/PhoneFrame";
 import Home from "./components/Home";
 import CafePage from "./components/CafePage";
 import BankPage from "./components/BankPage";
@@ -8,42 +9,44 @@ import BusPage from "./components/BusPage";
 import LotteriaPage from "./components/LotteriaPage";
 import TableOrderPage from "./components/TableOrderPage";
 import EmptyPage from "./components/EmptyPage";
+import HospitalPage from "./components/HospitalPage";
+import CardGame from "./components/CardGame";
+import GameListPage from "./components/GameListPage";
+import ChosungGame from "./components/ChosungGame";
+import PictureGame from "./components/PictureGame";
+import BlurryGame from "./components/BlurryGame";
+import ColorGame from "./components/ColorGame";
+
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    Component: Home,
-  },
-  {
-    path: "/cafe",
-    Component: CafePage,
-  },
-  {
-    path: "/bank",
-    Component: BankPage,
+    Component: PhoneFrame,
+    children: [
+      { path: "/", Component: Home },
+      { path: "/cafe", Component: CafePage },
+      { path: "/ktx", Component: KTXPage },
+      { path: "/bus", Component: BusPage },
+      { path: "/lotteria", Component: LotteriaPage },
+      { path: "/hospital", Component: HospitalPage },
+      { path: "/empty", Component: EmptyPage },
+      { path: "/game", Component: GameListPage },
+      { path: "/game/card", Component: CardGame },
+      { path: "/game/chosung", Component: ChosungGame },
+      { path: "/game/partial", Component: PictureGame },
+      { path: "/game/blurry", Component: BlurryGame },
+      { path: "/game/color", Component: ColorGame },
+    ],
   },
   {
     path: "/public",
     Component: PublicPage,
   },
   {
-    path: "/ktx",
-    Component: KTXPage,
-  },
-  {
-    path: "/bus",
-    Component: BusPage,
-  },
-  {
-    path: "/lotteria",
-    Component: LotteriaPage,
+    path: "/bank",
+    Component: BankPage,
   },
   {
     path: "/table-order",
     Component: TableOrderPage,
-  },
-  {
-    path: "/empty",
-    Component: EmptyPage,
   },
 ]);
