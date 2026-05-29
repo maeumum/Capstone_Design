@@ -33,7 +33,9 @@ type Step =
   | "land-year"
   | "land-history"
   | "land-owner-id"
-  | "land-quantity";
+  | "land-quantity"
+  | "family-notice"
+  | "family-notice-2";
 
 interface CategoryItem {
   id: string;
@@ -500,7 +502,7 @@ export default function PublicPage() {
                         if (!active) return;
                         setSelectedDoc(doc);
                         setResidentId("");
-                        setStep("resident-id");
+                        setStep("family-notice");
                       }}
                       onMouseDown={e => { if (active) e.currentTarget.style.filter = "brightness(1.2)"; }}
                       onMouseUp={e => (e.currentTarget.style.filter = "")}
@@ -700,6 +702,147 @@ export default function PublicPage() {
                 {(isCompact || isTwoCol || isFamily) ? "안녕하세요. 무인민원발급기입니다." : `〈${selectedCategory.name}〉`}
               </p>
             </div>
+          </div>
+        </div>
+      </PubPage>
+    );
+  }
+
+  // ── FAMILY NOTICE ─────────────────────────────────────────
+  if (step === "family-notice" && selectedDoc) {
+    return (
+      <PubPage>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "linear-gradient(180deg, #4dc8f0 0%, #7dd8f5 35%, #a8e8d0 72%, #6dbf72 100%)" }}>
+
+          {/* Header */}
+          <div style={{ padding: "28px 48px 20px", display: "flex", alignItems: "flex-start", gap: 18 }}>
+            <span style={{ fontSize: "48px", flexShrink: 0 }}>📢</span>
+            <p style={{ fontSize: "34px", fontWeight: 800, color: "#1a2a4a", margin: 0, lineHeight: 1.5 }}>
+              {selectedDoc.name} 발급을 계속하시려면 <span style={{ color: "#e53e3e" }}>확인버튼</span>을{" "}
+              발급업무를 중단하시려면 <span style={{ color: "#e53e3e" }}>첫화면버튼</span>을 눌러주십시오.
+            </p>
+          </div>
+
+          {/* Content card */}
+          <div style={{ flex: 1, margin: "0 36px 20px", background: "rgba(255,255,255,0.92)", borderRadius: 20, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+
+            {/* Blue banner */}
+            <div style={{ background: "linear-gradient(180deg, #1a52c8 0%, #1565c0 100%)", padding: "22px 0", textAlign: "center" }}>
+              <span style={{ color: "#fff", fontSize: "38px", fontWeight: 900, letterSpacing: "0.1em" }}>[발급안내]</span>
+            </div>
+
+            {/* Bullets */}
+            <div style={{ flex: 1, padding: "44px 80px", display: "flex", flexDirection: "column", gap: 44, justifyContent: "center", alignItems: "center" }}>
+              {/* Bullet 1 */}
+              <div style={{ display: "flex", gap: 20, alignItems: "flex-start", width: "100%" }}>
+                <span style={{ color: "#e53e3e", fontSize: "36px", lineHeight: 1.6, flexShrink: 0 }}>●</span>
+                <p style={{ fontSize: "36px", fontWeight: 700, color: "#111", margin: 0, lineHeight: 1.7, textAlign: "left" }}>
+                  {selectedDoc.name}는{" "}
+                  <span style={{ background: "#1a1a1a", color: "#f5c842", padding: "2px 8px", borderRadius: 4 }}>신청인(본인)</span>을{" "}
+                  <span style={{ background: "#f5c842", color: "#1a1a1a", padding: "2px 8px", borderRadius: 4 }}>기준</span>으로<br />
+                  <span style={{ background: "#f5c842", color: "#1a1a1a", padding: "2px 8px", borderRadius: 4 }}>부모, 배우자, 자녀 3대</span>에 한해서만 인적사항이 출력됩니다.
+                </p>
+              </div>
+
+              {/* Bullet 2 */}
+              <div style={{ display: "flex", gap: 20, alignItems: "flex-start", width: "100%" }}>
+                <span style={{ color: "#e53e3e", fontSize: "36px", lineHeight: 1.6, flexShrink: 0 }}>●</span>
+                <p style={{ fontSize: "36px", fontWeight: 700, color: "#111", margin: 0, lineHeight: 1.7, textAlign: "left" }}>
+                  <span style={{ background: "#f5c842", color: "#1a1a1a", padding: "2px 8px", borderRadius: 4 }}>형제, 자매</span>의 인적사항이 필요한 경우에는<br />
+                  가까운 <span style={{ background: "#f5c842", color: "#1a1a1a", padding: "2px 8px", borderRadius: 4 }}>관공서에 방문</span>하여 확인하시기바랍니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div style={{ padding: "10px 40px 14px", background: "linear-gradient(180deg, #5ab55a 0%, #2d7d2d 100%)", display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={reset}
+                style={{ background: "#222", border: "none", borderRadius: 999, padding: "16px 28px", fontSize: "18px", fontWeight: 700, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+              >
+                🏠 첫화면
+              </button>
+              <button
+                onClick={() => setStep("sub-doc")}
+                style={{ background: "#222", border: "none", borderRadius: 999, padding: "16px 28px", fontSize: "18px", fontWeight: 700, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+              >
+                ← 이전 화면
+              </button>
+            </div>
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={() => setStep("family-notice-2")}
+              style={{ background: "#1565c0", border: "none", borderRadius: 999, padding: "16px 36px", fontSize: "20px", fontWeight: 800, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 4px 14px rgba(0,0,0,0.25)" }}
+            >
+              ✓ 확인
+            </button>
+          </div>
+        </div>
+      </PubPage>
+    );
+  }
+
+  // ── FAMILY NOTICE 2 ────────────────────────────────────────
+  if (step === "family-notice-2" && selectedDoc) {
+    return (
+      <PubPage>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "linear-gradient(180deg, #4dc8f0 0%, #7dd8f5 35%, #a8e8d0 72%, #6dbf72 100%)" }}>
+
+          {/* Content card */}
+          <div style={{ flex: 1, margin: "28px 36px 20px", background: "rgba(255,255,255,0.92)", borderRadius: 20, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+
+            {/* Blue banner */}
+            <div style={{ background: "linear-gradient(180deg, #1a52c8 0%, #1565c0 100%)", padding: "22px 0", textAlign: "center" }}>
+              <span style={{ color: "#fff", fontSize: "38px", fontWeight: 900, letterSpacing: "0.15em" }}>[안 내]</span>
+            </div>
+
+            {/* Content */}
+            <div style={{ flex: 1, padding: "44px 80px", display: "flex", flexDirection: "column", gap: 36, justifyContent: "center" }}>
+              {/* Bullet */}
+              <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+                <span style={{ color: "#e53e3e", fontSize: "36px", lineHeight: 1.6, flexShrink: 0 }}>●</span>
+                <p style={{ fontSize: "36px", fontWeight: 700, color: "#111", margin: 0, lineHeight: 1.7 }}>
+                  증명서를 제출용으로 발급받고자 하는 경우에는<br />
+                  증명서를 제출요구자(예:관공서, 회사, 은행 등)에게<br />
+                  <span style={{ background: "#1a1a1a", color: "#f5c842", padding: "2px 8px", borderRadius: 4 }}>필요한 증명서의 종류</span>를{" "}
+                  <span style={{ background: "#f5c842", color: "#1a1a1a", padding: "2px 8px", borderRadius: 4 }}>미리 확인</span>한 후 발급받으시기 바랍니다.
+                </p>
+              </div>
+
+              {/* Red warning box */}
+              <div style={{ border: "3px solid #e53e3e", borderRadius: 12, padding: "20px 32px", textAlign: "center" }}>
+                <span style={{ fontSize: "34px", fontWeight: 800, color: "#e53e3e" }}>
+                  화면에 개인정보가 노출될 수 있으므로 유의하여 주십시오.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div style={{ padding: "10px 40px 14px", background: "linear-gradient(180deg, #5ab55a 0%, #2d7d2d 100%)", display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={reset}
+                style={{ background: "#222", border: "none", borderRadius: 999, padding: "16px 28px", fontSize: "18px", fontWeight: 700, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+              >
+                🏠 첫화면
+              </button>
+              <button
+                onClick={() => setStep("family-notice")}
+                style={{ background: "#222", border: "none", borderRadius: 999, padding: "16px 28px", fontSize: "18px", fontWeight: 700, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+              >
+                ← 이전 화면
+              </button>
+            </div>
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={() => setStep("resident-id")}
+              style={{ background: "#1565c0", border: "none", borderRadius: 999, padding: "16px 36px", fontSize: "20px", fontWeight: 800, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, boxShadow: "0 4px 14px rgba(0,0,0,0.25)" }}
+            >
+              ✓ 확인
+            </button>
           </div>
         </div>
       </PubPage>
@@ -998,7 +1141,7 @@ export default function PublicPage() {
               </p>
             </div>
             <button
-              onClick={() => setStep("recipient-select")}
+              onClick={() => setStep(selectedCategory?.id === "family-reg" ? "id-visibility" : "recipient-select")}
               style={{ background: "#3182ce", border: "none", borderRadius: 14, padding: "12px 24px", color: "#fff", fontSize: "16px", fontWeight: 700, cursor: "pointer", boxShadow: "0 3px 8px rgba(0,0,0,0.25)" }}
             >
               인식 완료 (시뮬레이션)
@@ -1350,7 +1493,7 @@ export default function PublicPage() {
             {idPanels.map(panel => (
               <button
                 key={panel.key}
-                onClick={() => { setIdVisible(panel.key); setStep("addr-visibility"); }}
+                onClick={() => { setIdVisible(panel.key); setStep(selectedCategory?.id === "family-reg" ? "quantity" : "addr-visibility"); }}
                 onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
                 onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
                 onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
@@ -1373,14 +1516,14 @@ export default function PublicPage() {
                 <span style={{ fontSize: "22px" }}>🏠</span>
                 <span style={{ color: "#fff", fontWeight: 700, fontSize: "12px" }}>첫화면</span>
               </button>
-              <button onClick={() => setStep("tax-period")} style={{ width: 70, height: 70, borderRadius: "50%", background: "#e53e3e", border: "2px solid #9b2c2c", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 3px 8px rgba(0,0,0,0.3)" }}>
+              <button onClick={() => setStep(selectedCategory?.id === "family-reg" ? "fingerprint-scan" : "tax-period")} style={{ width: 70, height: 70, borderRadius: "50%", background: "#e53e3e", border: "2px solid #9b2c2c", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 3px 8px rgba(0,0,0,0.3)" }}>
                 <span style={{ fontSize: "20px", color: "#fff" }}>←</span>
                 <span style={{ color: "#fff", fontWeight: 700, fontSize: "12px" }}>전화면</span>
               </button>
             </div>
             <div style={{ flex: 1, textAlign: "center" }}>
               <p style={{ color: "#f5e642", fontSize: "15px", margin: 0, fontWeight: 600 }}>
-                〈국세증명 → {selectedDoc.name.replace(/\n/g, "")}〉
+                〈{selectedCategory?.name ?? "국세증명"} → {selectedDoc.name.replace(/\n/g, "")}〉
               </p>
             </div>
             <div style={{ width: 70 }} />
@@ -2841,18 +2984,22 @@ export default function PublicPage() {
               <p style={{ fontSize: "22px", fontWeight: 800, color: "#1a3a6a", margin: 0 }}>
                 수수료면제&nbsp; <span style={{ fontWeight: 700 }}>{feeLabel}</span>
               </p>
-              <p style={{ fontSize: "20px", fontWeight: 800, color: "#1a3a6a", margin: "10px 0 4px" }}>선택항목</p>
-              <div style={{ flex: 1, overflow: "hidden" }}>
-                {OPT_LABELS.map((label, i) => {
-                  const val = optionIncludes[String(i + 1)] ?? "미포함";
-                  const tag = formatOpt(val);
-                  return (
-                    <p key={i} style={{ fontSize: "16px", color: "#1a1a1a", margin: "3px 0", lineHeight: 1.5 }}>
-                      {i + 1}.&nbsp;<span style={{ color: "#1a3a6a", fontWeight: 700 }}>{tag}</span>&nbsp;{label}
-                    </p>
-                  );
-                })}
-              </div>
+              {selectedCategory?.id !== "family-reg" && (
+                <>
+                  <p style={{ fontSize: "20px", fontWeight: 800, color: "#1a3a6a", margin: "10px 0 4px" }}>선택항목</p>
+                  <div style={{ flex: 1, overflow: "hidden" }}>
+                    {OPT_LABELS.map((label, i) => {
+                      const val = optionIncludes[String(i + 1)] ?? "미포함";
+                      const tag = formatOpt(val);
+                      return (
+                        <p key={i} style={{ fontSize: "16px", color: "#1a1a1a", margin: "3px 0", lineHeight: 1.5 }}>
+                          {i + 1}.&nbsp;<span style={{ color: "#1a3a6a", fontWeight: 700 }}>{tag}</span>&nbsp;{label}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Right: numpad */}
@@ -2941,50 +3088,84 @@ export default function PublicPage() {
   if (step === "payment" && selectedDoc) {
     return (
       <PubPage>
-        <SkyHeader onBack={() => setStep("quantity")} />
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "linear-gradient(180deg, #4dc8f0 0%, #7dd8f5 35%, #a8e8d0 72%, #6dbf72 100%)" }}>
 
-        <div className="flex-1 flex flex-col p-4 gap-4">
-          <div className="bg-white rounded-xl p-5 shadow-sm space-y-3">
-            <p className="text-gray-800 font-bold border-b border-gray-100 pb-3" style={{ fontSize: "17px" }}>
-              발급 내역 확인
+          {/* Blue header */}
+          <div style={{ background: "linear-gradient(180deg, #1565c0 0%, #1976d2 100%)", padding: "22px 48px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <p style={{ color: "#fff", fontSize: "30px", fontWeight: 800, margin: 0, textAlign: "center", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+              결제 수단을 선택하여 주십시오.
             </p>
-            {[
-              { label: "서류명", value: selectedDoc.name },
-              { label: "발급 매수", value: `${quantity}매` },
-              { label: "1매당 수수료", value: selectedDoc.fee > 0 ? `${selectedDoc.fee.toLocaleString()}원` : "무료" },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-gray-500" style={{ fontSize: "15px" }}>{label}</span>
-                <span className="text-gray-900 font-semibold" style={{ fontSize: "15px" }}>{value}</span>
+          </div>
+
+          {/* Content */}
+          <div style={{ flex: 1, display: "flex", gap: 32, padding: "28px 60px 20px", alignItems: "stretch" }}>
+
+            {/* Left: 발급 내역 */}
+            <div style={{ flex: 1, background: "rgba(255,255,255,0.90)", borderRadius: 20, padding: "28px 32px", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}>
+              <p style={{ fontSize: "24px", fontWeight: 900, color: "#1a3a6a", margin: 0, borderBottom: "2px solid #d0daea", paddingBottom: 14 }}>
+                발급 내역 확인
+              </p>
+              {[
+                { label: "서류명", value: selectedDoc.name.replace(/\n/g, " ") },
+                { label: "발급 매수", value: `${quantity}매` },
+                { label: "1매당 수수료", value: `${selectedDoc.fee.toLocaleString()}원` },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "22px", color: "#555", fontWeight: 600 }}>{label}</span>
+                  <span style={{ fontSize: "22px", color: "#1a1a1a", fontWeight: 700 }}>{value}</span>
+                </div>
+              ))}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #d0daea", paddingTop: 16, marginTop: 4 }}>
+                <span style={{ fontSize: "26px", color: "#1a3a6a", fontWeight: 800 }}>합계 수수료</span>
+                <span style={{ fontSize: "32px", color: "#1a3a6a", fontWeight: 900 }}>{totalFee.toLocaleString()}원</span>
               </div>
-            ))}
-            <div className="flex justify-between border-t-2 border-gray-200 pt-3 mt-2">
-              <span className="text-gray-900 font-bold" style={{ fontSize: "18px" }}>합계 수수료</span>
-              <span className="font-bold" style={{ fontSize: "22px", color: "#2d2d2d" }}>
-                {totalFee > 0 ? `${totalFee.toLocaleString()}원` : "무료"}
-              </span>
+            </div>
+
+            {/* Right: 결제 버튼 */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 20 }}>
+              <button
+                onClick={() => setStep("complete")}
+                onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+                onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+                style={{ flex: 1, background: "linear-gradient(180deg, #1565c0 0%, #0d47a1 100%)", borderRadius: 24, border: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.20)", transition: "transform 0.08s" }}
+              >
+                <span style={{ fontSize: "64px" }}>💳</span>
+                <span style={{ fontSize: "32px", fontWeight: 900, color: "#fff" }}>카드 결제</span>
+              </button>
+              <button
+                onClick={() => setStep("complete")}
+                onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+                onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+                style={{ flex: 1, background: "linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%)", borderRadius: 24, border: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, cursor: "pointer", boxShadow: "0 6px 24px rgba(0,0,0,0.20)", transition: "transform 0.08s" }}
+              >
+                <span style={{ fontSize: "64px" }}>💵</span>
+                <span style={{ fontSize: "32px", fontWeight: 900, color: "#fff" }}>현금 결제</span>
+              </button>
             </div>
           </div>
 
-          <div className="space-y-4 flex-1">
-            <button
-              onClick={() => setStep("complete")}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl py-10 flex flex-col items-center gap-3 shadow-xl active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "54px" }}>💳</span>
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>카드 결제</span>
-            </button>
-            <button
-              onClick={() => setStep("complete")}
-              className="w-full bg-green-700 hover:bg-green-800 text-white rounded-2xl py-10 flex flex-col items-center gap-3 shadow-xl active:scale-95 transition-all"
-            >
-              <span style={{ fontSize: "54px" }}>💵</span>
-              <span style={{ fontSize: "24px", fontWeight: "700" }}>현금 결제</span>
-            </button>
+          {/* Bottom bar */}
+          <div style={{ padding: "10px 40px 14px", background: "linear-gradient(180deg, #5ab55a 0%, #2d7d2d 100%)", display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={reset} style={{ width: 70, height: 70, borderRadius: "50%", background: "#e53e3e", border: "2px solid #9b2c2c", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 3px 8px rgba(0,0,0,0.3)" }}>
+                <span style={{ fontSize: "22px" }}>🏠</span>
+                <span style={{ color: "#fff", fontWeight: 700, fontSize: "12px" }}>첫화면</span>
+              </button>
+              <button onClick={() => setStep("quantity")} style={{ width: 70, height: 70, borderRadius: "50%", background: "#e53e3e", border: "2px solid #9b2c2c", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 3px 8px rgba(0,0,0,0.3)" }}>
+                <span style={{ fontSize: "20px", color: "#fff" }}>←</span>
+                <span style={{ color: "#fff", fontWeight: 700, fontSize: "12px" }}>전화면</span>
+              </button>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <p style={{ color: "#f5e642", fontSize: "15px", margin: 0, fontWeight: 600 }}>
+                〈{selectedCategory?.name ?? ""} → {selectedDoc.name.replace(/\n/g, "")}〉
+              </p>
+            </div>
+            <div style={{ width: 70 }} />
           </div>
         </div>
-
-        <GreenBar navigate={navigate} />
       </PubPage>
     );
   }
