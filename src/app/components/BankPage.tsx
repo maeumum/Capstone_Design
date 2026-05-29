@@ -32,8 +32,12 @@ function AtmPage({ children, onHome }: { children: React.ReactNode; onHome?: () 
     }}>
       <div className="atm-screen">
         <header className="atm-header">
-          <div className="slogan-slot">slogan placeholder</div>
-          <div className="logo-slot">bank logo placeholder</div>
+          <div className="slogan-slot">
+            <img src="/jb-logo-kr.jpg" alt="JB금융그룹" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+          </div>
+          <div className="logo-slot">
+            <img src="/jb-logo-en.jpg" alt="JB Financial Group" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+          </div>
         </header>
         {children}
       </div>
@@ -183,13 +187,13 @@ export default function BankPage() {
       <AtmPage onHome={() => navigate("/")}>
         <div className="atm-body">
           <div className="side-col left-col">
-            <div className="btn orange smaller-text two-line" onClick={notReady}>QR코드 거래/휴대폰거래/<br />스마트출금</div>
+            <div className="btn orange smaller-text two-line disabled">QR코드 거래/휴대폰거래/<br />스마트출금</div>
             <div className="btn" onClick={() => selectService("withdrawal")}>예금(수표)출금</div>
             <div className="btn" onClick={() => selectService("balance")}>잔액조회</div>
             <div className="btn small-text two-line" onClick={() => selectService("transfer")}>송금(계좌이체)<br />/펀드입금예약</div>
-            <div className="btn" onClick={notReady}>신용카드</div>
-            <div className="btn small-text two-line" onClick={notReady}>예금거래<br />기록조회</div>
-            <div className="btn" onClick={notReady}>대출업무</div>
+            <div className="btn disabled">신용카드</div>
+            <div className="btn small-text two-line disabled">예금거래<br />기록조회</div>
+            <div className="btn disabled">대출업무</div>
           </div>
           <div className="center-col">
             <div className="poster-frame" aria-label="poster area" />
@@ -212,11 +216,11 @@ export default function BankPage() {
           <div className="side-col right-col">
             <div className="btn" onClick={() => selectService("deposit")}>입금</div>
             <div className="btn" onClick={() => selectService("passbook")}>통장정리</div>
-            <div className="btn small-text two-line" onClick={notReady}>자동계좌<br />이체설정</div>
-            <div className="btn smaller-text two-line" onClick={() => selectService("utility")}>지로/공과금/세금/<br />지방세/범칙금</div>
-            <div className="btn small-text two-line" onClick={notReady}>자주쓰는<br />입금계좌관리</div>
-            <div className="btn" onClick={notReady}>무카드/무통장</div>
-            <div className="btn green two-line" onClick={notReady}>ENGLISH<br />日本語/漢語</div>
+            <div className="btn small-text two-line disabled">자동계좌<br />이체설정</div>
+            <div className="btn smaller-text two-line disabled">지로/공과금/세금/<br />지방세/범칙금</div>
+            <div className="btn small-text two-line disabled">자주쓰는<br />입금계좌관리</div>
+            <div className="btn disabled">무카드/무통장</div>
+            <div className="btn green two-line disabled">ENGLISH<br />日本語/漢語</div>
           </div>
         </div>
       </AtmPage>

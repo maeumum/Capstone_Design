@@ -109,19 +109,17 @@ html, body {
 .slogan-slot,
 .logo-slot {
   height: 64px;
-  border: 1.5px dashed rgba(40, 80, 140, .35);
-  border-radius: 8px;
-  background: rgba(255,255,255,.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 12px;
-  color: rgba(40, 80, 140, .55);
-  letter-spacing: .04em;
 }
 .slogan-slot { width: 460px; }
 .logo-slot   { width: 280px; }
+
+.slogan-slot img,
+.logo-slot img {
+  mix-blend-mode: multiply;
+}
 
 /* ---- Main layout: three columns (left buttons | center | right buttons) -- */
 .atm-body {
@@ -231,6 +229,19 @@ html, body {
   --tx: #ffffff;
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
+.btn.disabled {
+  --c1: #b0b8c8;
+  --c2: #9aa4b4;
+  --c3: #8a94a4;
+  --c4: #7a8494;
+  --tx: rgba(255,255,255,0.55);
+  cursor: default;
+  opacity: 0.55;
+  pointer-events: none;
+  text-shadow: none;
+  box-shadow: none;
+}
+.btn.disabled::before { display: none; }
 
 /* ---- Center column ------------------------------------------------------- */
 .center-col {
