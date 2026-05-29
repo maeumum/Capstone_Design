@@ -1032,13 +1032,13 @@ export default function LotteriaPage() {
   };
 
   const showHeader = scene !== "welcome";
-  const showFooter = scene !== "welcome" && scene !== "payproc" && scene !== "done";
+  const showFooter = scene !== "payproc" && scene !== "done";
 
   return (
     <div className="bo-page" style={{ "--font-scale": fontScale } as React.CSSProperties}>
       <ToastStack toasts={toasts} />
 
-      {showHeader && <StepHeader scene={scene} onHome={restart} />}
+      {showHeader && <StepHeader scene={scene} onHome={() => navigate("/")} />}
 
       <div className={`kbody ${showHeader ? "has-head" : "no-head"}`}>
         {scene === "welcome" && (
@@ -1091,7 +1091,7 @@ export default function LotteriaPage() {
       {showFooter && (
         <AccessFooter
           onBack={backOf[scene]}
-          onHome={restart}
+          onHome={() => navigate("/")}
           fontScale={fontScale}
           onCycleFont={cycleFont}
           onCallStaff={() => { setStaffOpen(true); toast("직원을 호출했습니다", { kind: "success", duration: 5000 }); }}

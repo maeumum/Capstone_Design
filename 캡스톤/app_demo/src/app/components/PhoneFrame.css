@@ -12,14 +12,10 @@
 
 .phone-frame {
   width: 390px;
-  height: 844px;
+  height: 100%;
+  border-radius: 20px;
+  overflow: auto;
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: #ffffff;
-  flex-shrink: 0;
-  /* Makes position:fixed children position relative to this frame */
-  transform: translateZ(0);
 }
 
 /* Scale down the frame on small screens */
