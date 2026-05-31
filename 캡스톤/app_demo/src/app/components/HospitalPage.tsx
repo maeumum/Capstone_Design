@@ -100,7 +100,7 @@ function BarcodeDisplay({ code }: { code: string }) {
 // ═══════════════════════════════════════════════════
 // HOSPITAL HEADER
 // ═══════════════════════════════════════════════════
-function HospitalHeader({ onHome }: { onHome: () => void }) {
+function HospitalHeader({ onHome, onAppHome }: { onHome: () => void; onAppHome: () => void }) {
   return (
     <div style={{
       background: `linear-gradient(135deg, ${SKY_DARKER} 0%, ${SKY} 100%)`,
@@ -115,11 +115,23 @@ function HospitalHeader({ onHome }: { onHome: () => void }) {
         <Home size={18}/>
         <span style={{ fontSize:11, fontWeight:700 }}>처음으로</span>
       </button>
+
       <h1 style={{ flex:1, textAlign:"center", fontWeight:900, fontSize:22, margin:0, letterSpacing:.5 }}>
         JB대학병원
       </h1>
-      {/* 오른쪽 여백 (처음으로 버튼과 대칭) */}
-      <div style={{ width:58 }}/>
+
+      {/* 앱 메인 메뉴로 이동 */}
+      <button onClick={onAppHome} style={{
+        background:"rgba(255,255,255,0.18)", border:"none", borderRadius:12,
+        padding:"9px 14px", color:"white", cursor:"pointer",
+        display:"flex", flexDirection:"column", alignItems:"center", gap:3,
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span style={{ fontSize:11, fontWeight:700 }}>홈으로</span>
+      </button>
     </div>
   );
 }
@@ -320,6 +332,20 @@ export default function HospitalPage() {
             <p style={{ fontSize:15, color:"#64748B", margin:"4px 0 0" }}>진료비를 납부합니다</p>
           </div>
         </button>
+
+        {/* 앱 메인 메뉴로 이동 */}
+        <button onClick={()=>navigate("/")}
+          style={{ borderRadius:14, padding:"14px 0", border:"none", cursor:"pointer",
+            background:"rgba(14,165,233,0.1)", color:SKY_DARKER,
+            fontWeight:700, fontSize:16,
+            display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          홈으로 (메인 메뉴)
+        </button>
       </div>
     </div>
   );
@@ -327,7 +353,7 @@ export default function HospitalPage() {
   // ── 번호 입력 (접수/수납 공용) ─────────────────────
   if (screen === "input") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
 
       <div style={{ flex:1, overflowY:"auto", padding:"16px" }}>
         {/* 타이틀 */}
@@ -419,7 +445,7 @@ export default function HospitalPage() {
   // ── 진료실 선택 ────────────────────────────────────
   if (screen === "rec_clinic") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, overflowY:"auto", padding:"20px 16px" }}>
         <div style={{ textAlign:"center", marginBottom:24 }}>
           <p style={{ fontSize:24, fontWeight:900, color:"#0F172A", margin:"0 0 8px" }}>진료실 선택</p>
@@ -472,7 +498,7 @@ export default function HospitalPage() {
   // ── 접수 완료 (접수증) ────────────────────────────
   if (screen === "rec_done") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, overflowY:"auto", padding:"16px" }}>
         {/* 완료 메시지 */}
         <div style={{ textAlign:"center", marginBottom:18 }}>
@@ -561,7 +587,7 @@ export default function HospitalPage() {
   // ── 수납 시작 ──────────────────────────────────────
   if (screen === "pay_start") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, overflowY:"auto", padding:"24px 16px" }}>
         <div style={{ textAlign:"center", marginBottom:28 }}>
           <p style={{ fontSize:24, fontWeight:900, color:"#0F172A", margin:"0 0 8px" }}>수납</p>
@@ -612,7 +638,7 @@ export default function HospitalPage() {
   // ── 바코드 스캔 ────────────────────────────────────
   if (screen === "pay_barcode") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center",
         justifyContent:"center", padding:"24px" }}>
         <p style={{ fontSize:17, fontWeight:700, color:"#1E293B", marginBottom:6 }}>바코드 스캔 중</p>
@@ -673,7 +699,7 @@ export default function HospitalPage() {
   // ── 결제 정보 확인 ─────────────────────────────────
   if (screen === "pay_info") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden", background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
 
       <div style={{ flex:1, overflowY:"auto", padding:"16px" }}>
         <div style={{ textAlign:"center", marginBottom:18 }}>
@@ -736,7 +762,7 @@ export default function HospitalPage() {
   if (screen === "pay_card") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden",
       background:"rgba(0,0,0,0.55)" }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
 
       {/* 배경 클릭 방지 */}
       <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
@@ -835,7 +861,7 @@ export default function HospitalPage() {
   if (screen === "pay_print") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden",
       background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center",
         justifyContent:"center", padding:24 }}>
         {/* 프린터 아이콘 */}
@@ -877,7 +903,7 @@ export default function HospitalPage() {
   if (screen === "pay_done") return (
     <div style={{ height:"100svh", display:"flex", flexDirection:"column", overflow:"hidden",
       background:SKY_LIGHT }}>
-      <HospitalHeader onHome={goHome}/>
+      <HospitalHeader onHome={goHome} onAppHome={()=>navigate("/")}/>
       <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center",
         justifyContent:"center", padding:32 }}>
         <div style={{ width:88, height:88, borderRadius:"50%",
