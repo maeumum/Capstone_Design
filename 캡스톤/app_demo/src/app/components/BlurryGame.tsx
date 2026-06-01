@@ -9,7 +9,7 @@ interface QuizItem {
 }
 
 const CDN = (code: string) =>
-  `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code.toLowerCase()}.svg`;
+  `/emoji/${code.toLowerCase()}.svg`;
 
 const ALL_ITEMS: QuizItem[] = [
   { word:"사과",      code:"1F34E", category:"과일", difficulty:1 },
