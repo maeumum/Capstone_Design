@@ -10,7 +10,7 @@ interface QuizItem {
 }
 
 const CDN = (code: string) =>
-  `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${code.toLowerCase()}.svg`;
+  `/emoji/${code.toLowerCase()}.svg`;
 
 const CROP_POSITIONS: CropPos[] = [
   "topLeft","topCenter","topRight",
